@@ -10,7 +10,7 @@
 
 **A fully on-chain Texas Hold'em poker game powered by FHEVM (Fully Homomorphic Encryption Virtual Machine), ensuring complete privacy and provable fairness.**
 
-[🎮 Live Demo](https://frontend-orpin-seven-10.vercel.app) | [📖 Documentation](./docs/DESIGN.md) | [🐛 Report Bug](../../issues)
+[🎮 Live Demo](https://frontend-orpin-seven-10.vercel.app) | [🎬 Video Demo](https://youtu.be/YOUR_VIDEO_ID) | [📖 Documentation](./docs/DESIGN.md) | [🐛 Report Bug](../../issues)
 
 </div>
 
@@ -18,9 +18,19 @@
 
 ## 📜 Deployed Contracts
 
-| Network | Contract | Address |
-|---------|----------|---------|
-| Sepolia | PokerTable | [`0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623`](https://sepolia.etherscan.io/address/0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623) |
+| Network | Contract | Address | Status |
+|---------|----------|---------|--------|
+| Sepolia | PokerTable | [`0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623`](https://sepolia.etherscan.io/address/0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623) | ✅ Deployed |
+
+---
+
+## 🎬 Video Demo
+
+[![FHE Poker Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg)](https://youtu.be/YOUR_VIDEO_ID)
+
+> **Watch the 2-minute demo** showing gameplay with FHE encryption in action!
+>
+> *Click the image above or [watch on YouTube](https://youtu.be/YOUR_VIDEO_ID)*
 
 ---
 
