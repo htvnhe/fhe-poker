@@ -33,97 +33,17 @@ export function Home() {
       alert('Wallet not detected');
       return;
     }
-
     setSwitchingNetwork(true);
     try {
       if (switchChain) {
         await switchChain({ chainId: SEPOLIA_CHAIN_ID });
-      } else {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x' + SEPOLIA_CHAIN_ID.toString(16) }],
-        });
       }
     } catch (error) {
-      if ((error as { code?: number }).code === 4902) {
-        try {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [
-              {
-                chainId: '0x' + SEPOLIA_CHAIN_ID.toString(16),
-                chainName: 'Sepolia',
-                rpcUrls: ['https://eth-sepolia.public.blastapi.io'],
-                nativeCurrency: {
-                  name: 'Sepolia ETH',
-                  symbol: 'ETH',
-                  decimals: 18,
-                },
-                blockExplorerUrls: ['https://sepolia.etherscan.io'],
-              },
-            ],
-          });
-        } catch (addError) {
-          console.error('Failed to add network:', addError);
-        }
-      }
+      console.error('Failed to switch:', error);
     } finally {
       setSwitchingNetwork(false);
     }
   };
-
-  // Not connected - show connect screen
-  if (!isConnected) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="fixed top-4 right-4">
-          <LanguageSwitcher />
-        </div>
-
-        <div className="w-full max-w-md">
-          <div className="bg-slate-800 rounded-xl p-8 border border-slate-700">
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-white mb-2">
-                {t('home.title')}
-              </h1>
-              <p className="text-slate-400">
-                {t('home.subtitle')}
-              </p>
-            </div>
-
-            <div className="bg-slate-700/50 rounded-lg p-4 mb-6">
-              <ul className="space-y-2 text-sm text-slate-300">
-                <li>{t('home.features.privacy.description')}</li>
-                <li>{t('home.features.fairness.description')}</li>
-                <li>{t('home.features.decentralized.description')}</li>
-              </ul>
-            </div>
-
-            <div className="space-y-3">
-              {connectors
-                .filter((connector) => {
-                  const allowedIds = ['metaMask', 'io.metamask', 'okx-wallet'];
-                  return allowedIds.includes(connector.id);
-                })
-                .map((connector) => (
-                <button
-                  key={connector.id}
-                  onClick={() => connect({ connector })}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
-                >
-                  {t('common.connect_wallet')} {connector.name}
-                </button>
-              ))}
-            </div>
-
-            <p className="mt-6 text-center text-xs text-slate-500">
-              Powered by Zama FHEVM
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // In game
   if (selectedTableId !== null) {
@@ -138,72 +58,175 @@ export function Home() {
   if (showLobby) {
     return (
       <GameProvider>
-        <Lobby onSelectTable={(tableId) => setSelectedTableId(tableId)} />
+        <Lobby onSelectTable={(tableId) => setSelectedTableId(tableId)} onBack={() => setShowLobby(false)} />
       </GameProvider>
+    );
+  }
+
+  // Not connected - show landing page
+  if (!isConnected) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-emerald-950 to-gray-900">
+        {/* Header */}
+        <header className="flex justify-between items-center p-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-xl">
+              🃏
+            </div>
+            <span className="text-xl font-bold text-white">FHE Poker</span>
+          </div>
+          <LanguageSwitcher />
+        </header>
+
+        {/* Hero Section */}
+        <main className="container mx-auto px-6 py-12">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+              {t('home.title')}
+            </h1>
+            <p className="text-xl md:text-2xl text-emerald-300 mb-4">
+              {t('home.subtitle')}
+            </p>
+            <p className="text-gray-400 mb-10 max-w-2xl mx-auto">
+              Play Texas Hold'em with complete privacy. Your cards are encrypted on-chain using Fully Homomorphic Encryption.
+            </p>
+
+            {/* Features */}
+            <div className="grid md:grid-cols-3 gap-6 mb-10">
+              <div className="bg-gray-800/50 backdrop-blur rounded-2xl p-6 border border-gray-700 hover:border-emerald-600 transition-colors">
+                <div className="text-4xl mb-4">🔐</div>
+                <h3 className="text-lg font-semibold text-white mb-2">Encrypted Cards</h3>
+                <p className="text-gray-400 text-sm">Your hole cards are encrypted using FHE. Only you can see them.</p>
+              </div>
+              <div className="bg-gray-800/50 backdrop-blur rounded-2xl p-6 border border-gray-700 hover:border-emerald-600 transition-colors">
+                <div className="text-4xl mb-4">⛓️</div>
+                <h3 className="text-lg font-semibold text-white mb-2">Fully On-Chain</h3>
+                <p className="text-gray-400 text-sm">All game logic runs on smart contracts. Provably fair.</p>
+              </div>
+              <div className="bg-gray-800/50 backdrop-blur rounded-2xl p-6 border border-gray-700 hover:border-emerald-600 transition-colors">
+                <div className="text-4xl mb-4">🛡️</div>
+                <h3 className="text-lg font-semibold text-white mb-2">Anti-Cheat</h3>
+                <p className="text-gray-400 text-sm">Async decryption ensures fair play. No front-running.</p>
+              </div>
+            </div>
+
+            {/* Connect Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              {connectors
+                .filter((connector) => ['metaMask', 'io.metamask', 'okx-wallet'].includes(connector.id))
+                .map((connector) => (
+                <button
+                  key={connector.id}
+                  onClick={() => connect({ connector })}
+                  className="flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-4 px-8 rounded-xl text-lg transition-all hover:scale-105 shadow-lg shadow-emerald-600/20"
+                >
+                  <span>🦊</span>
+                  Connect {connector.name}
+                </button>
+              ))}
+            </div>
+
+            <p className="mt-8 text-gray-500 text-sm">
+              Powered by <span className="text-emerald-400">Zama FHEVM</span> on Sepolia Testnet
+            </p>
+          </div>
+        </main>
+      </div>
     );
   }
 
   // Connected - show main menu
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="fixed top-4 right-4">
-        <LanguageSwitcher />
-      </div>
-
-      <div className="w-full max-w-md">
-        <div className="bg-slate-800 rounded-xl p-8 border border-slate-700">
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-white mb-2">
-              {t('home.welcome')}
-            </h1>
-            <p className="text-sm text-slate-400 font-mono">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-emerald-950 to-gray-900">
+      {/* Header */}
+      <header className="flex justify-between items-center p-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-xl">
+            🃏
+          </div>
+          <span className="text-xl font-bold text-white">FHE Poker</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <LanguageSwitcher />
+          <div className="flex items-center gap-2 bg-gray-800 rounded-full px-4 py-2">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+            <span className="text-white text-sm font-mono">
               {address?.slice(0, 6)}...{address?.slice(-4)}
-            </p>
-          </div>
-
-          {wrongNetwork && (
-            <div className="mb-6 p-4 bg-red-900/50 border border-red-700 rounded-lg">
-              <p className="text-sm text-red-300 mb-2">
-                Wrong network. Please switch to Sepolia.
-              </p>
-              <button
-                onClick={handleSwitchNetwork}
-                disabled={switchingNetwork}
-                className="w-full bg-red-600 hover:bg-red-500 text-white py-2 rounded-lg text-sm"
-              >
-                {switchingNetwork ? 'Switching...' : 'Switch to Sepolia'}
-              </button>
-            </div>
-          )}
-
-          <div className="space-y-3">
-            <button
-              onClick={() => setShowLobby(true)}
-              disabled={wrongNetwork}
-              className={`w-full py-4 rounded-lg font-semibold transition-colors ${
-                wrongNetwork
-                  ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
-                  : 'bg-emerald-600 hover:bg-emerald-500 text-white'
-              }`}
-            >
-              {t('lobby.enter')}
-            </button>
-
-            <button
-              onClick={() => disconnect()}
-              className="w-full bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-lg transition-colors"
-            >
-              {t('common.disconnect')}
-            </button>
-          </div>
-
-          <div className="mt-6 p-3 bg-yellow-900/30 border border-yellow-700/50 rounded-lg">
-            <p className="text-xs text-yellow-200">
-              {t('home.demo_warning')}
-            </p>
+            </span>
           </div>
         </div>
-      </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-6 py-12">
+        <div className="max-w-lg mx-auto">
+          {/* Welcome Card */}
+          <div className="bg-gray-800/70 backdrop-blur rounded-3xl p-8 border border-gray-700 shadow-2xl">
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl flex items-center justify-center text-4xl mx-auto mb-4 shadow-lg">
+                🎰
+              </div>
+              <h1 className="text-2xl font-bold text-white mb-2">
+                {t('home.welcome')}
+              </h1>
+              <p className="text-gray-400">Ready to play some poker?</p>
+            </div>
+
+            {/* Wrong Network Warning */}
+            {wrongNetwork && (
+              <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-xl">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-2xl">⚠️</span>
+                  <div>
+                    <p className="text-red-400 font-medium">Wrong Network</p>
+                    <p className="text-red-400/70 text-sm">Please switch to Sepolia testnet</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleSwitchNetwork}
+                  disabled={switchingNetwork}
+                  className="w-full bg-red-500 hover:bg-red-400 text-white py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
+                >
+                  {switchingNetwork ? 'Switching...' : 'Switch to Sepolia'}
+                </button>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="space-y-4">
+              <button
+                onClick={() => setShowLobby(true)}
+                disabled={wrongNetwork}
+                className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
+                  wrongNetwork
+                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white shadow-lg shadow-emerald-600/30 hover:scale-[1.02]'
+                }`}
+              >
+                🎮 {t('lobby.enter')}
+              </button>
+
+              <button
+                onClick={() => disconnect()}
+                className="w-full bg-gray-700/50 hover:bg-gray-700 text-gray-300 py-3 rounded-xl transition-colors border border-gray-600"
+              >
+                {t('common.disconnect')}
+              </button>
+            </div>
+
+            {/* Info */}
+            <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+              <div className="flex items-start gap-3">
+                <span className="text-xl">💡</span>
+                <div>
+                  <p className="text-yellow-400 font-medium text-sm">Testnet Demo</p>
+                  <p className="text-yellow-400/70 text-xs mt-1">{t('home.demo_warning')}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
