@@ -1,0 +1,158 @@
+{
+  "common": {
+    "connect_wallet": "Connect Wallet",
+    "disconnect": "Disconnect",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "back": "Back",
+    "chips": "Chips",
+    "please_connect_wallet": "Please connect your wallet first",
+    "fhevm_not_initialized": "FHEVM not initialized, please wait..."
+  },
+  "home": {
+    "title": "FHE Poker",
+    "subtitle": "On-chain Poker Game Based on Fully Homomorphic Encryption",
+    "description": "Complete Privacy · Fair & Just · On-chain Verification",
+    "welcome": "Welcome Back!",
+    "demo_warning": "This is a demo project, please do not use real funds",
+    "features": {
+      "privacy": {
+        "title": "Complete Privacy",
+        "description": "Hole cards are encrypted on-chain, only you can decrypt and view them"
+      },
+      "fairness": {
+        "title": "Fair & Just",
+        "description": "Smart contracts ensure transparent game rules, no cheating possible"
+      },
+      "decentralized": {
+        "title": "Decentralized",
+        "description": "No need to trust third parties, all logic executed on-chain"
+      }
+    },
+    "enter_lobby": "Enter Lobby",
+    "how_it_works": "How It Works",
+    "tech_stack": "Tech Stack"
+  },
+  "lobby": {
+    "title": "Game Lobby",
+    "enter": "Enter Game Lobby",
+    "create_table": "Create Table",
+    "create_new_table": "Create New Table",
+    "tables_count": "Tables",
+    "table_list": "Table List",
+    "table_number": "Table {{number}}",
+    "no_tables": "No Tables Yet",
+    "create_first_table": "Click the button in the top right corner to create the first table",
+    "table_id": "Table",
+    "players": "Players",
+    "blinds": "Blinds",
+    "status": "Status",
+    "small_blind": "Small Blind",
+    "big_blind": "Big Blind",
+    "join": "Join Game",
+    "enter_game": "Enter Game",
+    "checking": "Checking...",
+    "game_in_progress": "Game in Progress",
+    "full": "Full",
+    "in_game": "In Game",
+    "waiting": "Waiting",
+    "buy_in": "Buy-in Amount",
+    "create": "Create",
+    "creating": "Creating...",
+    "join_table_title": "Join Table #{{tableId}}",
+    "buy_in_amount": "Buy-in Amount",
+    "min_buy_in": "Minimum Buy-in: {{amount}}",
+    "joining": "Joining...",
+    "invalid_buy_in": "Please enter a valid buy-in amount",
+    "join_failed": "Join failed: {{error}}"
+  },
+  "game": {
+    "table_number": "Table #{{number}}",
+    "game_state": "Game State",
+    "pot": "Pot",
+    "your_hand": "Your Hand",
+    "your_cards": "Your Cards",
+    "community_cards": "Community Cards",
+    "empty_seat": "Empty Seat",
+    "decrypting": "Decrypting...",
+    "waiting": "Waiting...",
+    "processing": "Processing...",
+    "not_your_turn": "Not your turn",
+    "waiting_for_players": "Waiting for players...",
+    "waiting_for_dealer": "Game hasn't started yet, please click the button below to start",
+    "start_game": "Start Game",
+    "starting": "Starting...",
+    "your_turn": "Your Turn",
+    "your_turn_action": "Your Turn! Please choose an action",
+    "waiting_for_player": "Waiting for player...",
+    "waiting_for_other_players": "Waiting for other players...",
+    "leave_game": "Leave Game",
+    "leaving": "Leaving...",
+    "actions": {
+      "fold": "Fold",
+      "check": "Check",
+      "call": "Call",
+      "raise": "Raise",
+      "bet": "Bet",
+      "all_in": "All In"
+    },
+    "states": {
+      "waiting": "Waiting",
+      "preflop": "Pre-Flop",
+      "flop": "Flop",
+      "turn": "Turn",
+      "river": "River",
+      "showdown": "Showdown",
+      "ended": "Ended"
+    },
+    "player_actions": {
+      "folded": "Folded",
+      "checked": "Checked",
+      "called": "Called",
+      "raised": "Raised",
+      "bet": "Bet",
+      "all_in": "All In"
+    },
+    "player_status": {
+      "active": "Active",
+      "folded": "Folded",
+      "in_action": "In Action",
+      "you": "You"
+    },
+    "bet_amount": "Bet Amount",
+    "current_bet": "Current Bet",
+    "decrypting": "Decrypting...",
+    "encrypted": "Encrypted",
+    "dealer": "Dealer",
+    "small_blind_label": "SB",
+    "big_blind_label": "BB",
+    "winner": "Winner",
+    "showdown_phase": "Showdown Phase",
+    "reveal_cards": "Reveal Cards",
+    "reveal_cards_desc": "Please reveal your cards to participate in showdown",
+    "revealing": "Revealing...",
+    "cards_revealed": "Cards Revealed",
+    "waiting_others_reveal": "Waiting for other players to reveal..."
+  },
+  "errors": {
+    "wallet_not_connected": "Please connect wallet first",
+    "transaction_failed": "Transaction failed",
+    "game_not_started": "Game not started yet",
+    "game_ended": "Game has ended",
+    "not_your_turn": "Not your turn",
+    "invalid_bet": "Invalid bet amount",
+    "insufficient_balance": "Insufficient balance",
+    "fhevm_connection_error": "FHEVM Connection Error",
+    "fhevm_retry": "Retry Connection",
+    "fhevm_retrying": "Retrying...",
+    "relayer_unavailable": "Tip: Relayer service is temporarily unavailable, please retry later or refresh the page",
+    "contract_not_deployed": "Contract not deployed or network error",
+    "contract_error_hint": "Please ensure: 1) Connected to Sepolia testnet 2) Contract is properly deployed 3) Network connection is stable",
+    "wrong_network": "Wrong Network",
+    "switch_to_sepolia": "Switch to Sepolia"
+  }
+}
+

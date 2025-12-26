@@ -1,0 +1,158 @@
+{
+  "common": {
+    "connect_wallet": "连接钱包",
+    "disconnect": "断开连接",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "confirm": "确认",
+    "cancel": "取消",
+    "back": "返回",
+    "chips": "筹码",
+    "please_connect_wallet": "请先连接钱包",
+    "fhevm_not_initialized": "FHEVM 未初始化，请稍候..."
+  },
+  "home": {
+    "title": "FHE 德州扑克",
+    "subtitle": "基于全同态加密的链上扑克游戏",
+    "description": "完全隐私 · 公平公正 · 链上验证",
+    "welcome": "欢迎回来！",
+    "demo_warning": "这是一个演示项目，请不要使用真实资金",
+    "features": {
+      "privacy": {
+        "title": "完全隐私",
+        "description": "手牌在链上加密存储，只有玩家自己能解密查看"
+      },
+      "fairness": {
+        "title": "公平公正",
+        "description": "智能合约保证游戏规则透明，无法作弊"
+      },
+      "decentralized": {
+        "title": "去中心化",
+        "description": "无需信任第三方，所有逻辑在链上执行"
+      }
+    },
+    "enter_lobby": "进入大厅",
+    "how_it_works": "工作原理",
+    "tech_stack": "技术栈"
+  },
+  "lobby": {
+    "title": "游戏大厅",
+    "enter": "进入游戏大厅",
+    "create_table": "创建游戏桌",
+    "create_new_table": "创建新游戏桌",
+    "tables_count": "个游戏桌",
+    "table_list": "游戏桌列表",
+    "table_number": "桌号 {{number}}",
+    "no_tables": "暂无游戏桌",
+    "create_first_table": "点击右上角按钮创建第一个游戏桌",
+    "table_id": "桌号",
+    "players": "玩家数",
+    "blinds": "盲注",
+    "status": "状态",
+    "small_blind": "小盲注",
+    "big_blind": "大盲注",
+    "join": "加入游戏",
+    "enter_game": "进入游戏",
+    "checking": "检查中...",
+    "game_in_progress": "游戏进行中",
+    "full": "已满",
+    "in_game": "游戏中",
+    "waiting": "等待中",
+    "buy_in": "买入金额",
+    "create": "创建",
+    "creating": "创建中...",
+    "join_table_title": "加入游戏桌 #{{tableId}}",
+    "buy_in_amount": "买入金额",
+    "min_buy_in": "最小买入: {{amount}}",
+    "joining": "加入中...",
+    "invalid_buy_in": "请输入有效的买入金额",
+    "join_failed": "加入失败: {{error}}"
+  },
+  "game": {
+    "table_number": "桌号 #{{number}}",
+    "game_state": "游戏状态",
+    "pot": "奖池",
+    "your_hand": "你的手牌",
+    "your_cards": "你的手牌",
+    "community_cards": "公共牌",
+    "empty_seat": "空座位",
+    "decrypting": "解密中...",
+    "waiting": "等待...",
+    "processing": "处理中...",
+    "not_your_turn": "不是你的回合",
+    "waiting_for_players": "等待玩家加入...",
+    "waiting_for_dealer": "游戏还未开始，请点击下方按钮开始游戏",
+    "start_game": "开始游戏",
+    "starting": "开始中...",
+    "your_turn": "轮到你了",
+    "your_turn_action": "轮到你了！请选择操作",
+    "waiting_for_player": "等待玩家操作...",
+    "waiting_for_other_players": "等待其他玩家操作中...",
+    "leave_game": "离开游戏",
+    "leaving": "离开中...",
+    "actions": {
+      "fold": "弃牌",
+      "check": "过牌",
+      "call": "跟注",
+      "raise": "加注",
+      "bet": "下注",
+      "all_in": "全下"
+    },
+    "states": {
+      "waiting": "等待中",
+      "preflop": "翻牌前",
+      "flop": "翻牌圈",
+      "turn": "转牌圈",
+      "river": "河牌圈",
+      "showdown": "摊牌",
+      "ended": "已结束"
+    },
+    "player_actions": {
+      "folded": "已弃牌",
+      "checked": "过牌",
+      "called": "跟注",
+      "raised": "加注",
+      "bet": "下注",
+      "all_in": "全下"
+    },
+    "player_status": {
+      "active": "在场",
+      "folded": "已弃牌",
+      "in_action": "行动中",
+      "you": "你"
+    },
+    "bet_amount": "下注金额",
+    "current_bet": "当前下注",
+    "decrypting": "解密中...",
+    "encrypted": "加密",
+    "dealer": "庄家",
+    "small_blind_label": "小盲",
+    "big_blind_label": "大盲",
+    "winner": "获胜者",
+    "showdown_phase": "摊牌阶段",
+    "reveal_cards": "公开手牌",
+    "reveal_cards_desc": "请公开你的手牌以参与比牌",
+    "revealing": "公开中...",
+    "cards_revealed": "手牌已公开",
+    "waiting_others_reveal": "等待其他玩家公开手牌..."
+  },
+  "errors": {
+    "wallet_not_connected": "请先连接钱包",
+    "transaction_failed": "交易失败",
+    "game_not_started": "游戏还未开始",
+    "game_ended": "游戏已结束",
+    "not_your_turn": "还没轮到你",
+    "invalid_bet": "无效的下注金额",
+    "insufficient_balance": "余额不足",
+    "fhevm_connection_error": "FHEVM 连接错误",
+    "fhevm_retry": "重试连接",
+    "fhevm_retrying": "重试中...",
+    "relayer_unavailable": "提示：Relayer 服务暂时不可用，请稍后重试或刷新页面",
+    "contract_not_deployed": "合约未部署或网络错误",
+    "contract_error_hint": "请确保：1) 已连接到 Sepolia 测试网 2) 合约已正确部署 3) 网络连接正常",
+    "wrong_network": "网络错误",
+    "switch_to_sepolia": "切换到 Sepolia"
+  }
+}
+
