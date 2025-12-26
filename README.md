@@ -10,9 +10,17 @@
 
 **A fully on-chain Texas Hold'em poker game powered by FHEVM (Fully Homomorphic Encryption Virtual Machine), ensuring complete privacy and provable fairness.**
 
-[🎮 Live Demo](#) | [📖 Documentation](./docs/DESIGN.md) | [🎥 Video Demo](#) | [🐛 Report Bug](../../issues)
+[🎮 Live Demo](https://frontend-orpin-seven-10.vercel.app) | [📖 Documentation](./docs/DESIGN.md) | [🐛 Report Bug](../../issues)
 
 </div>
+
+---
+
+## 📜 Deployed Contracts
+
+| Network | Contract | Address |
+|---------|----------|---------|
+| Sepolia | PokerTable | [`0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623`](https://sepolia.etherscan.io/address/0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623) |
 
 ---
 
@@ -58,17 +66,18 @@
 
 ### 🎮 Play Now
 
-1. **Visit the Live Demo**: [https://fhe-poker-dusky.vercel.app/]
+1. **Visit the Live Demo**: [https://frontend-orpin-seven-10.vercel.app](https://frontend-orpin-seven-10.vercel.app)
 2. **Connect Wallet**: Click "Connect Wallet" and approve MetaMask
-3. **Join or Create Table**: Choose a table or create your own
-4. **Start Playing**: Enjoy privacy-preserving poker!
+3. **Switch to Sepolia**: Make sure you're on Sepolia testnet
+4. **Join or Create Table**: Choose a table or create your own
+5. **Start Playing**: Enjoy privacy-preserving poker!
 
 ### 💻 Local Development
 
 #### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/parkLGW/fhe-poker.git
+git clone https://github.com/htvnhe/fhe-poker.git
 cd fhe-poker
 ```
 
