@@ -1,5 +1,5 @@
 /**
- * Game Page - Improved UI
+ * Game Page - Clean UI
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -20,15 +20,15 @@ const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
 
 function PokerCard({ card, isHidden = false, size = 'md' }: { card?: number | null; isHidden?: boolean; size?: 'sm' | 'md' | 'lg' }) {
   const sizeClasses = {
-    sm: 'w-10 h-14 text-xs',
-    md: 'w-14 h-20 text-sm',
-    lg: 'w-20 h-28 text-lg'
+    sm: 'w-10 h-14 text-sm',
+    md: 'w-12 h-16 text-base',
+    lg: 'w-16 h-22 text-lg'
   };
 
   if (isHidden || card === null || card === undefined || card === 0) {
     return (
-      <div className={`${sizeClasses[size]} bg-gradient-to-br from-blue-900 to-blue-950 rounded-lg flex items-center justify-center border-2 border-blue-700 shadow-lg`}>
-        <div className="text-blue-400 text-2xl">🂠</div>
+      <div className={`${sizeClasses[size]} bg-blue-900 rounded-lg flex items-center justify-center border-2 border-blue-700`}>
+        <span className="text-blue-400">🂠</span>
       </div>
     );
   }
@@ -39,15 +39,15 @@ function PokerCard({ card, isHidden = false, size = 'md' }: { card?: number | nu
   const isRed = suit === '♥' || suit === '♦';
 
   return (
-    <div className={`${sizeClasses[size]} bg-white rounded-lg flex flex-col items-center justify-center shadow-xl border border-gray-200`}>
+    <div className={`${sizeClasses[size]} bg-white rounded-lg flex flex-col items-center justify-center shadow-md border border-gray-300`}>
       <span className={`font-bold ${isRed ? 'text-red-600' : 'text-gray-900'}`}>{rank}</span>
-      <span className={`text-xl ${isRed ? 'text-red-600' : 'text-gray-900'}`}>{suit}</span>
+      <span className={`${isRed ? 'text-red-600' : 'text-gray-900'}`}>{suit}</span>
     </div>
   );
 }
 
 export function Game({ tableId, onBack }: GameProps) {
-  useTranslation(); // i18n initialized
+  useTranslation();
   const { address } = useAccount();
   const fhevm = useFHEVM();
   const { state, setTableInfo, setPlayerCards, setCommunityCards, setLoading, setError } = useGameStore();
@@ -215,84 +215,68 @@ export function Game({ tableId, onBack }: GameProps) {
   const isMyTurn = myPlayerIndex !== null && currentPlayerIndex !== null && myPlayerIndex === currentPlayerIndex;
   const isDisabled = actionInProgress || !isMyTurn || gameState === 0 || gameState === 5 || gameState === 6;
 
-  const getStateInfo = (s: number) => {
-    const states: { [k: number]: { label: string; color: string } } = {
-      0: { label: 'Waiting for Players', color: 'bg-yellow-500' },
-      1: { label: 'Pre-Flop', color: 'bg-blue-500' },
-      2: { label: 'Flop', color: 'bg-purple-500' },
-      3: { label: 'Turn', color: 'bg-orange-500' },
-      4: { label: 'River', color: 'bg-red-500' },
-      5: { label: 'Showdown', color: 'bg-pink-500' },
-      6: { label: 'Game Over', color: 'bg-gray-500' },
+  const getStateLabel = (s: number) => {
+    const labels: { [k: number]: string } = {
+      0: 'Waiting', 1: 'Pre-Flop', 2: 'Flop', 3: 'Turn', 4: 'River', 5: 'Showdown', 6: 'Game Over'
     };
-    return states[s] || states[0];
+    return labels[s] || 'Waiting';
   };
 
   if (state.isLoading && !state.tableInfo) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-emerald-950 to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-5xl mb-4 animate-bounce">🃏</div>
-          <p className="text-white text-lg">Loading game...</p>
+          <div className="text-4xl mb-3">🃏</div>
+          <p className="text-white">Loading game...</p>
         </div>
       </div>
     );
   }
 
-  const stateInfo = getStateInfo(gameState);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-emerald-950 to-gray-900">
+    <div className="min-h-screen bg-slate-900">
       {/* Header */}
-      <header className="flex justify-between items-center p-4 border-b border-gray-800">
-        <div className="flex items-center gap-4">
-          <button onClick={onBack} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
-            <span className="text-xl">←</span>
-            <span>Lobby</span>
+      <header className="flex justify-between items-center p-4 bg-slate-800 border-b border-slate-700">
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="text-slate-400 hover:text-white px-2 py-1 rounded hover:bg-slate-700">
+            ← Lobby
           </button>
-          <div className="flex items-center gap-3">
-            <span className="text-xl font-bold text-white">Table #{tableId}</span>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium text-white ${stateInfo.color}`}>
-              {stateInfo.label}
-            </span>
-          </div>
+          <span className="text-lg font-bold text-white">Table #{tableId}</span>
+          <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded">{getStateLabel(gameState)}</span>
         </div>
         <div className="flex items-center gap-3">
-          <div className="bg-gray-800 rounded-full px-4 py-2 flex items-center gap-2">
-            <span className="text-gray-400 text-sm">Wallet:</span>
-            <span className="text-white text-sm font-mono">{address?.slice(0, 6)}...{address?.slice(-4)}</span>
-          </div>
+          <span className="text-slate-400 text-sm">{address?.slice(0, 6)}...{address?.slice(-4)}</span>
           <button
             onClick={handleLeaveGame}
             disabled={isLeavingGame}
-            className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+            className="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded text-sm disabled:opacity-50"
           >
-            {isLeavingGame ? 'Leaving...' : 'Leave Table'}
+            {isLeavingGame ? 'Leaving...' : 'Leave'}
           </button>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-4">
         {/* Poker Table */}
-        <div className="relative bg-gradient-to-br from-emerald-800 to-emerald-900 rounded-[40px] p-8 mb-6 border-8 border-amber-900 shadow-2xl" style={{ minHeight: '400px' }}>
+        <div className="bg-green-800 rounded-3xl p-6 mb-4 border-4 border-amber-800" style={{ minHeight: '300px' }}>
           {/* Table Info */}
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/40 backdrop-blur rounded-full px-6 py-2 flex gap-6">
-            <div className="text-center">
-              <div className="text-gray-400 text-xs">POT</div>
-              <div className="text-yellow-400 font-bold text-lg">{pot}</div>
+          <div className="flex justify-center gap-6 mb-4">
+            <div className="bg-black/40 rounded-lg px-4 py-2 text-center">
+              <div className="text-slate-400 text-xs">POT</div>
+              <div className="text-yellow-400 font-bold">{pot}</div>
             </div>
-            <div className="border-l border-gray-600 pl-6 text-center">
-              <div className="text-gray-400 text-xs">BLINDS</div>
-              <div className="text-white font-medium">{smallBlind}/{bigBlind}</div>
+            <div className="bg-black/40 rounded-lg px-4 py-2 text-center">
+              <div className="text-slate-400 text-xs">BLINDS</div>
+              <div className="text-white">{smallBlind}/{bigBlind}</div>
             </div>
-            <div className="border-l border-gray-600 pl-6 text-center">
-              <div className="text-gray-400 text-xs">PLAYERS</div>
-              <div className="text-white font-medium">{playerCount}/6</div>
+            <div className="bg-black/40 rounded-lg px-4 py-2 text-center">
+              <div className="text-slate-400 text-xs">PLAYERS</div>
+              <div className="text-white">{playerCount}/6</div>
             </div>
           </div>
 
           {/* Community Cards */}
-          <div className="flex justify-center items-center gap-3 mt-16 mb-8">
+          <div className="flex justify-center gap-2 mb-4">
             {[0, 1, 2, 3, 4].map((idx) => {
               const card = state.communityCards?.[idx];
               const isRevealed = card && Number(card) !== 0;
@@ -300,8 +284,8 @@ export function Game({ tableId, onBack }: GameProps) {
             })}
           </div>
 
-          {/* Players Grid */}
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-8">
+          {/* Players */}
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
             {playersInfo && playersInfo.players.map((player, idx) => {
               const isOccupied = player && player !== '0x0000000000000000000000000000000000000000';
               const isMe = address && player?.toLowerCase() === address.toLowerCase();
@@ -312,9 +296,8 @@ export function Game({ tableId, onBack }: GameProps) {
 
               if (!isOccupied) {
                 return (
-                  <div key={idx} className="bg-black/20 rounded-xl p-3 text-center border border-dashed border-gray-600">
-                    <div className="text-gray-500 text-xs">Empty Seat</div>
-                    <div className="text-gray-600 text-lg mt-1">#{idx + 1}</div>
+                  <div key={idx} className="bg-black/20 rounded-lg p-2 text-center border border-dashed border-slate-600">
+                    <div className="text-slate-500 text-xs">Seat {idx + 1}</div>
                   </div>
                 );
               }
@@ -322,22 +305,18 @@ export function Game({ tableId, onBack }: GameProps) {
               return (
                 <div
                   key={idx}
-                  className={`rounded-xl p-3 transition-all ${
-                    isCurrentPlayer
-                      ? 'bg-yellow-500/20 border-2 border-yellow-500 shadow-lg shadow-yellow-500/20'
-                      : 'bg-black/30 border border-gray-700'
+                  className={`rounded-lg p-2 text-center ${
+                    isCurrentPlayer ? 'bg-yellow-500/30 border-2 border-yellow-500' : 'bg-black/30 border border-slate-600'
                   } ${isFolded ? 'opacity-40' : ''}`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className={`text-xs font-medium truncate ${isMe ? 'text-emerald-400' : 'text-white'}`}>
-                      {isMe ? 'YOU' : `${player.slice(0, 4)}..`}
-                    </span>
-                    <div className="flex gap-1">
-                      {isDealer && <span className="bg-yellow-500 text-black text-xs px-1.5 py-0.5 rounded font-bold">D</span>}
-                      {isCurrentPlayer && !isFolded && <span className="bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">●</span>}
-                    </div>
+                  <div className={`text-xs font-medium truncate ${isMe ? 'text-green-400' : 'text-white'}`}>
+                    {isMe ? 'YOU' : `${player.slice(0, 4)}..`}
                   </div>
-                  {bet > 0 && <div className="text-yellow-400 text-sm font-medium">{bet}</div>}
+                  <div className="flex justify-center gap-1 mt-1">
+                    {isDealer && <span className="bg-yellow-500 text-black text-xs px-1 rounded">D</span>}
+                    {isCurrentPlayer && !isFolded && <span className="bg-green-500 text-white text-xs px-1 rounded">●</span>}
+                  </div>
+                  {bet > 0 && <div className="text-yellow-400 text-xs">{bet}</div>}
                   {isFolded && <div className="text-red-400 text-xs">Folded</div>}
                 </div>
               );
@@ -345,25 +324,21 @@ export function Game({ tableId, onBack }: GameProps) {
           </div>
         </div>
 
-        {/* Your Hand */}
-        <div className="bg-gray-800/70 backdrop-blur rounded-2xl p-6 mb-6 border border-gray-700">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-6">
+        {/* Your Hand & Actions */}
+        <div className="bg-slate-800 rounded-lg p-4 mb-4 border border-slate-700">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
               <div className="text-center">
-                <div className="text-gray-400 text-sm mb-3">Your Hand</div>
-                <div className="flex gap-3">
+                <div className="text-slate-400 text-sm mb-2">Your Hand</div>
+                <div className="flex gap-2">
                   {gameState === 0 ? (
                     <><PokerCard isHidden size="lg" /><PokerCard isHidden size="lg" /></>
                   ) : decryptedCards.card1 !== null && decryptedCards.card2 !== null ? (
                     <><PokerCard card={decryptedCards.card1} size="lg" /><PokerCard card={decryptedCards.card2} size="lg" /></>
                   ) : isDecrypting ? (
-                    <div className="flex gap-3">
-                      <div className="w-20 h-28 bg-gray-700 rounded-lg flex items-center justify-center animate-pulse">
-                        <span className="text-gray-500">🔐</span>
-                      </div>
-                      <div className="w-20 h-28 bg-gray-700 rounded-lg flex items-center justify-center animate-pulse">
-                        <span className="text-gray-500">🔐</span>
-                      </div>
+                    <div className="flex gap-2">
+                      <div className="w-16 h-22 bg-slate-700 rounded-lg animate-pulse flex items-center justify-center">🔐</div>
+                      <div className="w-16 h-22 bg-slate-700 rounded-lg animate-pulse flex items-center justify-center">🔐</div>
                     </div>
                   ) : (
                     <><PokerCard isHidden size="lg" /><PokerCard isHidden size="lg" /></>
@@ -371,41 +346,36 @@ export function Game({ tableId, onBack }: GameProps) {
                 </div>
               </div>
 
-              {/* Turn Indicator */}
-              <div className="text-center px-6 border-l border-gray-700">
-                {gameState > 0 && gameState < 5 && (
-                  isMyTurn ? (
-                    <div className="bg-emerald-500/20 border border-emerald-500 rounded-xl px-6 py-3">
-                      <div className="text-emerald-400 font-bold text-lg">Your Turn!</div>
-                      <div className="text-emerald-300 text-sm">Make your move</div>
+              {gameState > 0 && gameState < 5 && (
+                <div className="text-center px-4 border-l border-slate-600">
+                  {isMyTurn ? (
+                    <div className="bg-green-900/50 border border-green-500 rounded-lg px-4 py-2">
+                      <div className="text-green-400 font-bold">Your Turn!</div>
                     </div>
                   ) : (
-                    <div className="text-gray-400">
-                      <div className="text-sm">Waiting for</div>
-                      <div className="font-medium">other players...</div>
-                    </div>
-                  )
-                )}
-              </div>
+                    <div className="text-slate-400 text-sm">Waiting...</div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
             {gameState > 0 && gameState < 5 && (
-              <div className="flex flex-wrap gap-3">
+              <div className="flex gap-2">
                 <button onClick={() => handleAction('fold')} disabled={isDisabled}
-                  className="bg-red-600 hover:bg-red-500 disabled:bg-gray-700 disabled:text-gray-500 text-white px-6 py-3 rounded-xl font-bold transition-all">
+                  className="bg-red-600 hover:bg-red-500 disabled:bg-slate-700 disabled:text-slate-500 text-white px-4 py-2 rounded-lg font-medium">
                   Fold
                 </button>
                 <button onClick={() => handleAction('check')} disabled={isDisabled}
-                  className="bg-gray-600 hover:bg-gray-500 disabled:bg-gray-700 disabled:text-gray-500 text-white px-6 py-3 rounded-xl font-bold transition-all">
+                  className="bg-slate-600 hover:bg-slate-500 disabled:bg-slate-700 disabled:text-slate-500 text-white px-4 py-2 rounded-lg font-medium">
                   Check
                 </button>
                 <button onClick={() => handleAction('call')} disabled={isDisabled}
-                  className="bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-500 text-white px-6 py-3 rounded-xl font-bold transition-all">
+                  className="bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 text-white px-4 py-2 rounded-lg font-medium">
                   Call
                 </button>
                 <button onClick={() => setShowBetModal(true)} disabled={isDisabled}
-                  className="bg-yellow-500 hover:bg-yellow-400 disabled:bg-gray-700 disabled:text-gray-500 text-black px-6 py-3 rounded-xl font-bold transition-all">
+                  className="bg-yellow-500 hover:bg-yellow-400 disabled:bg-slate-700 disabled:text-slate-500 text-black px-4 py-2 rounded-lg font-medium">
                   Raise
                 </button>
               </div>
@@ -413,55 +383,52 @@ export function Game({ tableId, onBack }: GameProps) {
           </div>
         </div>
 
-        {/* Game State Messages */}
+        {/* State Messages */}
         {gameState === 0 && playerCount < 2 && (
-          <div className="bg-blue-500/20 border border-blue-500/50 rounded-2xl p-6 text-center">
-            <div className="text-3xl mb-2">⏳</div>
-            <div className="text-blue-300 font-medium">Waiting for more players...</div>
-            <div className="text-blue-400/70 text-sm">Need at least 2 players to start</div>
+          <div className="bg-blue-900/50 border border-blue-600 rounded-lg p-4 text-center">
+            <div className="text-blue-300">⏳ Waiting for players... (need 2+)</div>
           </div>
         )}
 
         {gameState === 0 && playerCount >= 2 && (
-          <div className="bg-purple-500/20 border border-purple-500/50 rounded-2xl p-6 text-center">
+          <div className="bg-purple-900/50 border border-purple-600 rounded-lg p-4 text-center">
             {myPlayerIndex !== null && state.tableInfo && myPlayerIndex === Number(state.tableInfo[4]) ? (
               <button onClick={handleStartGame} disabled={isStartingGame}
-                className="bg-purple-600 hover:bg-purple-500 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all disabled:opacity-50">
+                className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-lg font-bold disabled:opacity-50">
                 {isStartingGame ? 'Starting...' : '🎮 Start Game'}
               </button>
             ) : (
-              <div className="text-purple-300">Waiting for dealer to start the game...</div>
+              <div className="text-purple-300">Waiting for dealer to start...</div>
             )}
           </div>
         )}
 
         {gameState === 5 && !hasRevealedCards && decryptedCards.card1 !== null && (
-          <div className="bg-pink-500/20 border border-pink-500/50 rounded-2xl p-6 text-center">
-            <div className="text-pink-300 mb-4">Time to reveal your cards!</div>
+          <div className="bg-pink-900/50 border border-pink-600 rounded-lg p-4 text-center">
             <button onClick={handleRevealCards} disabled={actionInProgress}
-              className="bg-pink-600 hover:bg-pink-500 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">
+              className="bg-pink-600 hover:bg-pink-500 text-white px-6 py-2 rounded-lg font-medium disabled:opacity-50">
               {actionInProgress ? 'Revealing...' : '👀 Reveal Cards'}
             </button>
           </div>
         )}
 
         {gameState === 5 && hasRevealedCards && (
-          <div className="bg-green-500/20 border border-green-500/50 rounded-2xl p-6 text-center">
-            <div className="text-green-300">Cards revealed! Waiting for others...</div>
+          <div className="bg-green-900/50 border border-green-600 rounded-lg p-4 text-center">
+            <div className="text-green-300">✓ Cards revealed! Waiting for others...</div>
           </div>
         )}
 
         {gameState === 6 && (
-          <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-2xl p-8 text-center">
-            <div className="text-5xl mb-4">🏆</div>
-            <h2 className="text-3xl font-bold text-white mb-2">Game Over!</h2>
+          <div className="bg-yellow-900/50 border border-yellow-600 rounded-lg p-6 text-center">
+            <div className="text-4xl mb-2">🏆</div>
+            <h2 className="text-2xl font-bold text-white mb-2">Game Over!</h2>
             {winnerInfo && winnerInfo.winnerIndex !== 255 && (
-              <p className="text-yellow-400 text-xl mb-4">
+              <p className="text-yellow-400 mb-4">
                 Winner: {winnerInfo.winnerAddress.slice(0, 6)}...{winnerInfo.winnerAddress.slice(-4)}
                 {address && winnerInfo.winnerAddress.toLowerCase() === address.toLowerCase() && ' (You! 🎉)'}
               </p>
             )}
-            <button onClick={onBack} className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-medium">
+            <button onClick={onBack} className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg">
               Back to Lobby
             </button>
           </div>
@@ -470,19 +437,19 @@ export function Game({ tableId, onBack }: GameProps) {
 
       {/* Bet Modal */}
       {showBetModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-md border border-gray-700">
-            <h3 className="text-xl font-bold text-white mb-6 text-center">Raise Amount</h3>
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-lg p-5 w-full max-w-sm border border-slate-700">
+            <h3 className="text-lg font-bold text-white mb-4 text-center">Raise Amount</h3>
             <input
               type="number"
               value={betAmount}
               onChange={(e) => setBetAmount(e.target.value)}
               placeholder="Enter amount..."
-              className="w-full bg-gray-900 text-white text-xl rounded-xl px-4 py-4 border border-gray-700 focus:border-emerald-500 focus:outline-none text-center font-bold mb-6"
+              className="w-full bg-slate-900 text-white rounded-lg px-3 py-3 border border-slate-600 focus:border-blue-500 focus:outline-none text-center text-lg mb-4"
             />
-            <div className="flex gap-3">
-              <button onClick={() => setShowBetModal(false)} className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-xl font-medium">Cancel</button>
-              <button onClick={handleBet} disabled={actionInProgress} className="flex-1 bg-yellow-500 hover:bg-yellow-400 text-black py-3 rounded-xl font-bold disabled:opacity-50">
+            <div className="flex gap-2">
+              <button onClick={() => setShowBetModal(false)} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2.5 rounded-lg">Cancel</button>
+              <button onClick={handleBet} disabled={actionInProgress} className="flex-1 bg-yellow-500 hover:bg-yellow-400 text-black py-2.5 rounded-lg font-medium disabled:opacity-50">
                 {actionInProgress ? 'Raising...' : 'Raise'}
               </button>
             </div>

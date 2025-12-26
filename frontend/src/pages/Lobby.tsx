@@ -1,5 +1,5 @@
 /**
- * Game Lobby - Improved UI
+ * Game Lobby - Clean UI
  */
 
 import { useState, useEffect } from 'react';
@@ -78,33 +78,30 @@ export function Lobby({ onSelectTable, onBack }: LobbyProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-emerald-950 to-gray-900">
+    <div className="min-h-screen bg-slate-900">
       {/* Header */}
-      <header className="flex justify-between items-center p-6 border-b border-gray-800">
+      <header className="flex justify-between items-center p-4 bg-slate-800 border-b border-slate-700">
         <div className="flex items-center gap-4">
           {onBack && (
             <button
               onClick={onBack}
-              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+              className="text-slate-400 hover:text-white px-3 py-1 rounded hover:bg-slate-700"
             >
-              <span className="text-xl">←</span>
-              <span>Back</span>
+              ← Back
             </button>
           )}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-xl">
-              🃏
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🃏</span>
             <div>
-              <h1 className="text-xl font-bold text-white">{t('lobby.title')}</h1>
-              <p className="text-emerald-400 text-sm">{tableCount} tables available</p>
+              <h1 className="text-lg font-bold text-white">{t('lobby.title')}</h1>
+              <p className="text-blue-400 text-sm">{tableCount} tables</p>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <LanguageSwitcher />
-          <div className="flex items-center gap-2 bg-gray-800 rounded-full px-4 py-2">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+          <div className="flex items-center gap-2 bg-slate-700 rounded-lg px-3 py-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <span className="text-white text-sm font-mono">
               {address?.slice(0, 6)}...{address?.slice(-4)}
             </span>
@@ -112,66 +109,66 @@ export function Lobby({ onSelectTable, onBack }: LobbyProps) {
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-8">
-        {/* Actions Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+      <main className="container mx-auto px-4 py-6">
+        {/* Actions */}
+        <div className="flex flex-wrap gap-3 mb-6">
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+            className={`px-4 py-2 rounded-lg font-medium ${
               showCreateForm
-                ? 'bg-gray-700 text-gray-300'
-                : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20'
+                ? 'bg-slate-700 text-slate-300'
+                : 'bg-blue-600 hover:bg-blue-500 text-white'
             }`}
           >
-            {showCreateForm ? '✕ Cancel' : '+ Create New Table'}
+            {showCreateForm ? '✕ Cancel' : '+ Create Table'}
           </button>
           <button
             onClick={() => loadTables(true)}
             disabled={state.isLoading}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-medium transition-colors border border-gray-700"
+            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"
           >
             🔄 Refresh
           </button>
 
-          {/* FHEVM Status */}
-          <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm ${
+          {/* FHE Status */}
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
             fhevm.isInitialized
-              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+              ? 'bg-green-900/50 text-green-400 border border-green-700'
               : fhevm.isInitializing
-                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                ? 'bg-yellow-900/50 text-yellow-400 border border-yellow-700'
+                : 'bg-red-900/50 text-red-400 border border-red-700'
           }`}>
             <div className={`w-2 h-2 rounded-full ${
-              fhevm.isInitialized ? 'bg-emerald-400' : fhevm.isInitializing ? 'bg-yellow-400 animate-pulse' : 'bg-red-400'
+              fhevm.isInitialized ? 'bg-green-400' : fhevm.isInitializing ? 'bg-yellow-400 animate-pulse' : 'bg-red-400'
             }`}></div>
-            {fhevm.isInitialized ? '🔐 FHE Ready' : fhevm.isInitializing ? '⏳ FHE Loading...' : '❌ FHE Error'}
+            {fhevm.isInitialized ? 'FHE Ready' : fhevm.isInitializing ? 'FHE Loading...' : 'FHE Error'}
           </div>
         </div>
 
-        {/* Create Table Form */}
+        {/* Create Form */}
         {showCreateForm && (
-          <div className="bg-gray-800/70 backdrop-blur rounded-2xl p-6 mb-8 border border-gray-700">
-            <h3 className="text-xl font-bold text-white mb-6">Create New Table</h3>
-            <div className="grid sm:grid-cols-3 gap-6">
+          <div className="bg-slate-800 rounded-lg p-4 mb-6 border border-slate-700">
+            <h3 className="text-lg font-bold text-white mb-4">Create New Table</h3>
+            <div className="grid sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Small Blind</label>
+                <label className="block text-sm text-slate-400 mb-1">Small Blind</label>
                 <input
                   type="number"
                   value={smallBlind}
                   onChange={(e) => setSmallBlind(e.target.value)}
                   disabled={isCreating}
-                  className="w-full bg-gray-900 text-white rounded-xl px-4 py-3 border border-gray-700 focus:border-emerald-500 focus:outline-none"
+                  className="w-full bg-slate-900 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-blue-500 focus:outline-none"
                   placeholder="10"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Big Blind</label>
+                <label className="block text-sm text-slate-400 mb-1">Big Blind</label>
                 <input
                   type="number"
                   value={bigBlind}
                   onChange={(e) => setBigBlind(e.target.value)}
                   disabled={isCreating}
-                  className="w-full bg-gray-900 text-white rounded-xl px-4 py-3 border border-gray-700 focus:border-emerald-500 focus:outline-none"
+                  className="w-full bg-slate-900 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-blue-500 focus:outline-none"
                   placeholder="20"
                 />
               </div>
@@ -179,29 +176,29 @@ export function Lobby({ onSelectTable, onBack }: LobbyProps) {
                 <button
                   onClick={handleCreateTable}
                   disabled={isCreating}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-medium disabled:opacity-50 transition-colors"
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
                 >
-                  {isCreating ? 'Creating...' : 'Create Table'}
+                  {isCreating ? 'Creating...' : 'Create'}
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Network Warning */}
+        {/* Wrong Network */}
         {fhevm.wrongNetwork && (
-          <div className="bg-red-500/20 border border-red-500/50 rounded-2xl p-6 mb-8">
-            <div className="flex items-center gap-4">
-              <span className="text-3xl">⚠️</span>
+          <div className="bg-red-900/50 border border-red-600 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">⚠️</span>
               <div className="flex-1">
                 <p className="text-red-400 font-medium">Wrong Network</p>
-                <p className="text-red-400/70 text-sm">Please switch to Sepolia testnet to play</p>
+                <p className="text-red-300 text-sm">Switch to Sepolia to play</p>
               </div>
               <button
                 onClick={() => fhevm.switchToSepolia()}
-                className="bg-red-500 hover:bg-red-400 text-white px-6 py-2 rounded-xl font-medium"
+                className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg"
               >
-                Switch Network
+                Switch
               </button>
             </div>
           </div>
@@ -209,30 +206,30 @@ export function Lobby({ onSelectTable, onBack }: LobbyProps) {
 
         {/* Loading */}
         {state.isLoading && tables.length === 0 && (
-          <div className="text-center py-20">
-            <div className="text-4xl mb-4 animate-bounce">🎰</div>
-            <p className="text-gray-400">Loading tables...</p>
+          <div className="text-center py-12">
+            <div className="text-4xl mb-3">🎰</div>
+            <p className="text-slate-400">Loading tables...</p>
           </div>
         )}
 
-        {/* Empty State */}
+        {/* Empty */}
         {!state.isLoading && tables.length === 0 && (
-          <div className="text-center py-20 bg-gray-800/30 rounded-3xl border border-gray-700">
-            <div className="text-6xl mb-6">🎲</div>
-            <h3 className="text-2xl font-bold text-white mb-2">No Tables Yet</h3>
-            <p className="text-gray-400 mb-6">Be the first to create a table and start playing!</p>
+          <div className="text-center py-12 bg-slate-800 rounded-lg border border-slate-700">
+            <div className="text-5xl mb-4">🎲</div>
+            <h3 className="text-xl font-bold text-white mb-2">No Tables</h3>
+            <p className="text-slate-400 mb-4">Create the first table!</p>
             <button
               onClick={() => setShowCreateForm(true)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-xl font-medium transition-colors"
+              className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg"
             >
-              + Create First Table
+              + Create Table
             </button>
           </div>
         )}
 
-        {/* Table Grid */}
+        {/* Tables Grid */}
         {tables.length > 0 && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {tables.map((table) => (
               <TableCard
                 key={table.id}
@@ -255,7 +252,7 @@ interface TableCardProps {
 }
 
 function TableCard({ tableId, info, onSelect }: TableCardProps) {
-  useTranslation(); // i18n initialized
+  useTranslation();
   const { address } = useAccount();
   const fhevm = useFHEVM();
   const [showJoinDialog, setShowJoinDialog] = useState(false);
@@ -287,20 +284,19 @@ function TableCard({ tableId, info, onSelect }: TableCardProps) {
     checkPlayerStatus();
   }, [address, tableId]);
 
-  const getStateInfo = (state: number) => {
-    const states: { [key: number]: { label: string; color: string; icon: string } } = {
-      0: { label: 'Waiting', color: 'text-yellow-400 bg-yellow-400/10', icon: '⏳' },
-      1: { label: 'Pre-Flop', color: 'text-blue-400 bg-blue-400/10', icon: '🃏' },
-      2: { label: 'Flop', color: 'text-purple-400 bg-purple-400/10', icon: '🎴' },
-      3: { label: 'Turn', color: 'text-orange-400 bg-orange-400/10', icon: '🎴' },
-      4: { label: 'River', color: 'text-red-400 bg-red-400/10', icon: '🎴' },
-      5: { label: 'Showdown', color: 'text-pink-400 bg-pink-400/10', icon: '👀' },
-      6: { label: 'Ended', color: 'text-gray-400 bg-gray-400/10', icon: '🏁' },
+  const getStateLabel = (state: number) => {
+    const labels: { [key: number]: string } = {
+      0: '⏳ Waiting',
+      1: '🃏 Pre-Flop',
+      2: '🎴 Flop',
+      3: '🎴 Turn',
+      4: '🎴 River',
+      5: '👀 Showdown',
+      6: '🏁 Ended',
     };
-    return states[state] || states[0];
+    return labels[state] || '⏳ Waiting';
   };
 
-  const stateInfo = getStateInfo(gameState);
   const isMyTable = playerTableId === tableId + 1;
   const canJoin = gameState === 0 && playerCount < 6;
 
@@ -322,7 +318,7 @@ function TableCard({ tableId, info, onSelect }: TableCardProps) {
       return;
     }
     if (!fhevm.isInitialized) {
-      alert('FHEVM is initializing... Please wait a moment and try again.');
+      alert('FHE is loading... Please wait and try again.');
       return;
     }
     if (!buyInAmount || Number(buyInAmount) <= 0) {
@@ -347,118 +343,99 @@ function TableCard({ tableId, info, onSelect }: TableCardProps) {
 
   return (
     <>
-      <div className={`bg-gray-800/70 backdrop-blur rounded-2xl border transition-all hover:scale-[1.02] ${
-        isMyTable ? 'border-emerald-500 shadow-lg shadow-emerald-500/20' : 'border-gray-700 hover:border-gray-600'
+      <div className={`bg-slate-800 rounded-lg border p-4 ${
+        isMyTable ? 'border-green-500' : 'border-slate-700 hover:border-slate-500'
       }`}>
-        <div className="p-5">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">🎰</span>
-              <span className="text-lg font-bold text-white">Table #{tableId}</span>
-            </div>
-            <span className={`text-xs px-3 py-1 rounded-full font-medium ${stateInfo.color}`}>
-              {stateInfo.icon} {stateInfo.label}
-            </span>
-          </div>
-
-          {/* Info */}
-          <div className="space-y-3 mb-5">
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400 flex items-center gap-2">
-                <span>👥</span> Players
-              </span>
-              <span className="text-white font-medium">
-                {playerCount}/6
-                <span className="ml-2 text-xs text-gray-500">
-                  {6 - playerCount > 0 ? `(${6 - playerCount} seats open)` : '(Full)'}
-                </span>
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400 flex items-center gap-2">
-                <span>💰</span> Blinds
-              </span>
-              <span className="text-emerald-400 font-medium">{smallBlind}/{bigBlind}</span>
-            </div>
-          </div>
-
-          {/* Progress bar for players */}
-          <div className="mb-5">
-            <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-emerald-500 transition-all"
-                style={{ width: `${(playerCount / 6) * 100}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Action Button */}
-          <button
-            onClick={handleJoinClick}
-            disabled={checkingStatus || (!canJoin && !isMyTable)}
-            className={`w-full py-3 rounded-xl font-bold transition-all ${
-              checkingStatus
-                ? 'bg-gray-700 text-gray-500'
-                : isMyTable
-                ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                : canJoin
-                ? 'bg-blue-600 hover:bg-blue-500 text-white'
-                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-            }`}
-          >
-            {checkingStatus
-              ? '...'
-              : isMyTable
-              ? '🎮 Enter Game'
-              : canJoin
-              ? '🚪 Join Table'
-              : gameState === 6
-              ? 'Game Ended'
-              : 'In Progress'}
-          </button>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-lg font-bold text-white">Table #{tableId}</span>
+          <span className="text-sm text-slate-400">{getStateLabel(gameState)}</span>
         </div>
+
+        {/* Info */}
+        <div className="space-y-2 mb-4 text-sm">
+          <div className="flex justify-between">
+            <span className="text-slate-400">Players</span>
+            <span className="text-white">{playerCount}/6</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-slate-400">Blinds</span>
+            <span className="text-blue-400">{smallBlind}/{bigBlind}</span>
+          </div>
+        </div>
+
+        {/* Progress */}
+        <div className="mb-4">
+          <div className="h-1.5 bg-slate-700 rounded-full">
+            <div
+              className="h-full bg-blue-500 rounded-full"
+              style={{ width: `${(playerCount / 6) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Button */}
+        <button
+          onClick={handleJoinClick}
+          disabled={checkingStatus || (!canJoin && !isMyTable)}
+          className={`w-full py-2.5 rounded-lg font-medium ${
+            checkingStatus
+              ? 'bg-slate-700 text-slate-500'
+              : isMyTable
+              ? 'bg-green-600 hover:bg-green-500 text-white'
+              : canJoin
+              ? 'bg-blue-600 hover:bg-blue-500 text-white'
+              : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+          }`}
+        >
+          {checkingStatus
+            ? '...'
+            : isMyTable
+            ? '🎮 Enter'
+            : canJoin
+            ? '🚪 Join'
+            : gameState === 6
+            ? 'Ended'
+            : 'In Progress'}
+        </button>
       </div>
 
-      {/* Join Dialog */}
+      {/* Join Modal */}
       {showJoinDialog && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-md border border-gray-700 shadow-2xl">
-            <div className="text-center mb-6">
-              <div className="text-4xl mb-2">🎰</div>
-              <h3 className="text-xl font-bold text-white">Join Table #{tableId}</h3>
-              <p className="text-gray-400 text-sm mt-1">Blinds: {smallBlind}/{bigBlind}</p>
-            </div>
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-lg p-5 w-full max-w-sm border border-slate-700">
+            <h3 className="text-lg font-bold text-white mb-1">Join Table #{tableId}</h3>
+            <p className="text-slate-400 text-sm mb-4">Blinds: {smallBlind}/{bigBlind}</p>
 
-            <div className="mb-6">
-              <label className="block text-sm text-gray-400 mb-2">Buy-in Amount (chips)</label>
+            <div className="mb-4">
+              <label className="block text-sm text-slate-400 mb-1">Buy-in Amount</label>
               <input
                 type="number"
                 value={buyInAmount}
                 onChange={(e) => setBuyInAmount(e.target.value)}
                 disabled={isJoining}
-                className="w-full bg-gray-900 text-white text-lg rounded-xl px-4 py-4 border border-gray-700 focus:border-emerald-500 focus:outline-none text-center font-bold"
+                className="w-full bg-slate-900 text-white rounded-lg px-3 py-3 border border-slate-600 focus:border-blue-500 focus:outline-none text-center text-lg"
                 placeholder="1000"
               />
-              <p className="text-xs text-gray-500 mt-2 text-center">
-                Minimum: {bigBlind * 10} chips (10x big blind)
+              <p className="text-xs text-slate-500 mt-1 text-center">
+                Min: {bigBlind * 10} chips
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={() => setShowJoinDialog(false)}
                 disabled={isJoining}
-                className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-xl font-medium transition-colors"
+                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2.5 rounded-lg"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmJoin}
                 disabled={isJoining}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold disabled:opacity-50 transition-colors"
+                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-lg font-medium disabled:opacity-50"
               >
-                {isJoining ? 'Joining...' : 'Join Game'}
+                {isJoining ? 'Joining...' : 'Join'}
               </button>
             </div>
           </div>
