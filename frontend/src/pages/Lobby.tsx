@@ -141,8 +141,17 @@ export function Lobby({ onSelectTable, onBack }: LobbyProps) {
             <div className={`w-2 h-2 rounded-full ${
               fhevm.isInitialized ? 'bg-green-400' : fhevm.isInitializing ? 'bg-yellow-400 animate-pulse' : 'bg-red-400'
             }`}></div>
-            {fhevm.isInitialized ? 'FHE Ready' : fhevm.isInitializing ? 'FHE Loading...' : 'FHE Error'}
+            <span>{fhevm.isInitialized ? 'FHE Ready' : fhevm.isInitializing ? 'FHE Loading...' : 'FHE Error'}</span>
+            {fhevm.debugInfo && <span className="text-xs opacity-70">({fhevm.debugInfo})</span>}
           </div>
+          {!fhevm.isInitialized && !fhevm.isInitializing && (
+            <button
+              onClick={() => fhevm.retryInitialization()}
+              className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm"
+            >
+              Retry FHE
+            </button>
+          )}
         </div>
 
         {/* Create Form */}

@@ -32,10 +32,7 @@ async function waitForSDK(maxWaitTime: number = 30000): Promise<any> {
  * @param chainId 链ID (11155111 for Sepolia, 31337 for localhost)
  */
 export async function initFHEVM(_chainId: number = 11155111): Promise<FhevmInstance> {
-  if (!window.crossOriginIsolated) {
-    throw new Error('浏览器环境不支持 FHEVM：缺少 Cross-Origin Isolation');
-  }
-
+  // Skip cross-origin check - let it try anyway
   if (fhevmInstance) {
     return fhevmInstance;
   }

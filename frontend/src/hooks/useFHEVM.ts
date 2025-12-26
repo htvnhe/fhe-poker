@@ -15,17 +15,21 @@ export function useFHEVM() {
   const [error, setError] = useState<Error | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [wrongNetwork, setWrongNetwork] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
     if (address && chainId !== SEPOLIA_CHAIN_ID) {
       setWrongNetwork(true);
-      setError(new Error('Switch network to Sepolia!'));
+      setError(new Error('Switch to Sepolia!'));
     } else {
       setWrongNetwork(false);
+      if (error?.message === 'Switch to Sepolia!') {
+        setError(null);
+      }
     }
   }, [address, chainId]);
 
-  // 初始化FHEVM
+  // Initialize FHEVM
   useEffect(() => {
     if (!address || isInitialized || isInitializing || wrongNetwork) {
       return;
@@ -34,48 +38,63 @@ export function useFHEVM() {
     const initialize = async () => {
       setIsInitializing(true);
       setError(null);
-
-      // 设置30秒超时
-      const timeoutId = setTimeout(() => {
-        resetFHEVM();
-        setIsInitializing(false);
-        setError(new Error('FHEVM初始化超时，请刷新页面重试'));
-      }, 30000);
+      setDebugInfo('Starting FHE init...');
 
       try {
+        // Check if SDK is loaded
+        if (!window.relayerSDK) {
+          setDebugInfo('Waiting for SDK to load...');
+          // Wait up to 10 seconds for SDK
+          for (let i = 0; i < 100; i++) {
+            await new Promise(r => setTimeout(r, 100));
+            if (window.relayerSDK) break;
+          }
+        }
+
+        if (!window.relayerSDK) {
+          throw new Error('SDK not loaded from CDN');
+        }
+
+        setDebugInfo('SDK loaded, initializing...');
         await initFHEVM(chainId);
-        clearTimeout(timeoutId);
         setIsInitialized(true);
-      } catch (err) {
-        clearTimeout(timeoutId);
-        resetFHEVM(); // 重置Promise状态
+        setDebugInfo('FHE Ready!');
+        console.log('✅ FHE initialized successfully');
+      } catch (err: any) {
+        console.error('❌ FHE init failed:', err);
+        setDebugInfo(`Error: ${err.message}`);
+        resetFHEVM();
         setError(err as Error);
+
+        // Auto retry after 3 seconds (max 3 retries)
+        if (retryCount < 3) {
+          setTimeout(() => {
+            setRetryCount(prev => prev + 1);
+          }, 3000);
+        }
       } finally {
         setIsInitializing(false);
       }
     };
 
     initialize();
-  }, [address, chainId, retryCount, wrongNetwork]); // 添加 wrongNetwork 依赖
+  }, [address, chainId, retryCount, wrongNetwork, isInitialized, isInitializing]);
 
-  // 切换到 Sepolia 网络
   const switchToSepolia = async () => {
     if (!switchChain) {
-      throw new Error('无法切换网络');
+      throw new Error('Cannot switch network');
     }
     try {
       await switchChain({ chainId: sepolia.id });
       setWrongNetwork(false);
       setError(null);
-      // 切换成功后自动重试初始化
       setRetryCount(prev => prev + 1);
     } catch (err) {
-      console.error('切换网络失败:', err);
+      console.error('Switch network failed:', err);
       throw err;
     }
   };
 
-  // 手动重试初始化
   const retryInitialization = () => {
     setIsInitialized(false);
     setIsInitializing(false);
@@ -84,52 +103,45 @@ export function useFHEVM() {
     setRetryCount(prev => prev + 1);
   };
 
-  // 加密买入金额
   const encryptBuyIn = async (amount: number) => {
     if (!isInitialized || !address) {
-      throw new Error('FHEVM not initialized or no address');
+      throw new Error('FHE not ready');
     }
     return encryptUint64(amount, POKER_TABLE_ADDRESS, address);
   };
 
-  // 加密下注金额
   const encryptBetAmount = async (amount: number) => {
     if (!isInitialized || !address) {
-      throw new Error('FHEVM not initialized or no address');
+      throw new Error('FHE not ready');
     }
     return encryptUint64(amount, POKER_TABLE_ADDRESS, address);
   };
 
-  // 加密扑克牌
   const encryptCard = async (cardValue: number) => {
     if (!isInitialized || !address) {
-      throw new Error('FHEVM not initialized or no address');
+      throw new Error('FHE not ready');
     }
     return encryptUint8(cardValue, POKER_TABLE_ADDRESS, address);
   };
 
-  // 解密手牌
   const decryptCard = async (handle: string, contractAddr: string, userAddr: string, signer: any) => {
     if (!isInitialized) {
-      throw new Error('FHEVM not initialized');
+      throw new Error('FHE not ready');
     }
     return decryptUint8(handle, contractAddr, userAddr, signer);
   };
 
-  // 批量解密手牌 (只签名一次)
   const decryptCards = async (handles: string[], contractAddr: string, userAddr: string, signer: any) => {
     if (!isInitialized) {
-      throw new Error('FHEVM not initialized');
+      throw new Error('FHE not ready');
     }
     return decryptUint8Batch(handles, contractAddr, userAddr, signer);
   };
 
-  // 解密余额
   const decryptBalance = async (handle: string, contractAddr: string, userAddr: string, signer: any) => {
     if (!isInitialized) {
-      throw new Error('FHEVM not initialized');
+      throw new Error('FHE not ready');
     }
-    // 余额是 euint64，使用与解密下注金额相同的方法
     const instance = await initFHEVM(chainId);
     const { getAddress } = await import('ethers');
     const checksumContractAddr = getAddress(contractAddr);
@@ -149,13 +161,14 @@ export function useFHEVM() {
     isInitializing,
     error,
     wrongNetwork,
+    debugInfo,
     encryptBuyIn,
     encryptBetAmount,
     encryptCard,
     decryptCard,
     decryptCards,
     decryptBalance,
-    retryInitialization, // 导出重试函数
-    switchToSepolia, // 导出切换网络函数
+    retryInitialization,
+    switchToSepolia,
   };
 }
