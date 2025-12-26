@@ -1,4 +1,4 @@
-# 🎮 FHE Poker - Privacy-Preserving On-Chain Texas Hold'em
+# 🎮 Stealth Hold'em - Privacy-Preserving On-Chain Texas Hold'em
 
 <div align="center">
 
@@ -20,7 +20,7 @@
 
 | Network | Contract | Address | Status |
 |---------|----------|---------|--------|
-| Sepolia | PokerTable | [`0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623`](https://sepolia.etherscan.io/address/0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623) | ✅ Deployed |
+| Sepolia | CipherTable | [`0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623`](https://sepolia.etherscan.io/address/0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623) | ✅ Verified |
 
 ---
 
@@ -97,8 +97,8 @@ cd fhe-poker
 # Install contract dependencies
 npm install
 
-# Install frontend dependencies
-cd frontend
+# Install app dependencies
+cd app
 npm install
 cd ..
 ```
@@ -138,10 +138,10 @@ npx hardhat deploy --network sepolia
 npx hardhat verify --network sepolia <CONTRACT_ADDRESS>
 ```
 
-#### 7. Run Frontend
+#### 7. Run App
 
 ```bash
-cd frontend
+cd app
 npm run dev
 ```
 
