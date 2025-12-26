@@ -1,24 +1,23 @@
 /**
- * Game Lobby - Clean UI
+ * 游戏大厅 - 重新设计版本
+ * 职责：显示游戏桌列表，处理用户交互
  */
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAccount } from 'wagmi';
 import { useTranslation } from 'react-i18next';
 import { contractService } from '../services/ContractService';
-import { callCreateTable } from '../lib/ethers-contract';
 import { useFHEVM } from '../hooks/useFHEVM';
 import { useGameStore } from '../store/gameStore.tsx';
 import { LanguageSwitcher } from '../components/layout/LanguageSwitcher';
 
 interface LobbyProps {
   onSelectTable: (tableId: number) => void;
-  onBack?: () => void;
 }
 
-export function Lobby({ onSelectTable, onBack }: LobbyProps) {
-  const { t } = useTranslation();
-  const { address } = useAccount();
+export function Lobby({ onSelectTable }: LobbyProps) {
+  const { t, i18n } = useTranslation();
   const fhevm = useFHEVM();
   const { state, setLoading, setError } = useGameStore();
 
@@ -27,16 +26,19 @@ export function Lobby({ onSelectTable, onBack }: LobbyProps) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [smallBlind, setSmallBlind] = useState('10');
   const [bigBlind, setBigBlind] = useState('20');
-  const [isCreating, setIsCreating] = useState(false);
 
+  // 加载游戏桌列表函数 - 提取到外部以便在创建后调用
   const loadTables = async (showLoading = true) => {
     try {
-      if (showLoading) setLoading(true);
+      if (showLoading) {
+        setLoading(true);
+      }
       await contractService.initialize();
 
       const count = await contractService.getTableCount();
       setTableCount(count);
 
+      // 加载每个游戏桌的信息
       const tableList = [];
       for (let i = 0; i < count; i++) {
         const info = await contractService.getTableInfo(i);
@@ -47,209 +49,267 @@ export function Lobby({ onSelectTable, onBack }: LobbyProps) {
     } catch (err) {
       setError((err as Error).message);
     } finally {
-      if (showLoading) setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   };
 
+  // 定时轮询游戏桌列表
   useEffect(() => {
+    // 首次加载显示 loading
     loadTables(true);
+    // 定时轮询不显示 loading，避免频繁闪烁
     const interval = setInterval(() => loadTables(false), 5000);
     return () => clearInterval(interval);
   }, []);
 
   const handleCreateTable = async () => {
     if (!smallBlind || !bigBlind) {
-      alert('Please enter blind amounts');
+      alert('请输入盲注金额');
       return;
     }
 
     try {
-      setIsCreating(true);
-      await callCreateTable(Number(smallBlind), Number(bigBlind));
+      setLoading(true);
+      await contractService.createTable(Number(smallBlind), Number(bigBlind));
+
+      // 重新加载游戏桌列表 - 不显示 loading（因为外层已经在显示）
       await loadTables(false);
+
+      // 成功后关闭表单并重置输入
       setShowCreateForm(false);
       setSmallBlind('10');
       setBigBlind('20');
     } catch (err) {
-      alert('Failed to create: ' + (err as Error).message);
+      setError((err as Error).message);
+      alert('创建失败: ' + (err as Error).message);
     } finally {
-      setIsCreating(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-900">
-      {/* Header */}
-      <header className="flex justify-between items-center p-4 bg-slate-800 border-b border-slate-700">
-        <div className="flex items-center gap-4">
-          {onBack && (
+    <div className="min-h-screen overflow-x-hidden p-8">
+      <div className="max-w-[1600px] mx-auto">
+        {/* 头部 */}
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">{t('lobby.title')}</h1>
+            <p className="text-emerald-400">{tableCount} {t('lobby.tables_count')}</p>
+          </div>
+          {/* 右侧按钮组 */}
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             <button
-              onClick={onBack}
-              className="text-slate-400 hover:text-white px-3 py-1 rounded hover:bg-slate-700"
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
             >
-              ← Back
+              {showCreateForm ? t('common.cancel') : t('lobby.create_table')}
             </button>
-          )}
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🃏</span>
-            <div>
-              <h1 className="text-lg font-bold text-white">{t('lobby.title')}</h1>
-              <p className="text-blue-400 text-sm">{tableCount} tables</p>
-            </div>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <LanguageSwitcher />
-          <div className="flex items-center gap-2 bg-slate-700 rounded-lg px-3 py-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-white text-sm font-mono">
-              {address?.slice(0, 6)}...{address?.slice(-4)}
-            </span>
-          </div>
-        </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-6">
-        {/* Actions */}
-        <div className="flex flex-wrap gap-3 mb-6">
-          <button
-            onClick={() => setShowCreateForm(!showCreateForm)}
-            className={`px-4 py-2 rounded-lg font-medium ${
-              showCreateForm
-                ? 'bg-slate-700 text-slate-300'
-                : 'bg-blue-600 hover:bg-blue-500 text-white'
-            }`}
-          >
-            {showCreateForm ? '✕ Cancel' : '+ Create Table'}
-          </button>
-          <button
-            onClick={() => loadTables(true)}
-            disabled={state.isLoading}
-            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"
-          >
-            🔄 Refresh
-          </button>
+        {/* 创建桌子弹窗 */}
+        {showCreateForm && createPortal(
+          <>
+            {/* 半透明遮罩层 */}
+            <div
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                backdropFilter: 'blur(2px)',
+                zIndex: 9998
+              }}
+              onClick={() => !state.isLoading && setShowCreateForm(false)}
+            />
 
-          {/* FHE Status */}
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
-            fhevm.isInitialized
-              ? 'bg-green-900/50 text-green-400 border border-green-700'
-              : fhevm.isInitializing
-                ? 'bg-yellow-900/50 text-yellow-400 border border-yellow-700'
-                : 'bg-red-900/50 text-red-400 border border-red-700'
-          }`}>
-            <div className={`w-2 h-2 rounded-full ${
-              fhevm.isInitialized ? 'bg-green-400' : fhevm.isInitializing ? 'bg-yellow-400 animate-pulse' : 'bg-red-400'
-            }`}></div>
-            <span>{fhevm.isInitialized ? 'FHE Ready' : fhevm.isInitializing ? 'FHE Loading...' : 'FHE Error'}</span>
-            {fhevm.debugInfo && <span className="text-xs opacity-70">({fhevm.debugInfo})</span>}
-          </div>
-          {!fhevm.isInitialized && !fhevm.isInitializing && (
-            <button
-              onClick={() => fhevm.retryInitialization()}
-              className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm"
+            {/* 弹窗内容 */}
+            <div
+              style={{
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 9999,
+                maxWidth: '90vw',
+                width: '400px',
+                backgroundColor: '#047857',
+                boxSizing: 'border-box',
+                borderRadius: '20px',
+                overflow: 'hidden'
+              }}
+              className="shadow-2xl animate-scaleIn border-2 border-emerald-600"
+              onClick={(e) => e.stopPropagation()}
             >
-              Retry FHE
-            </button>
-          )}
-        </div>
+              <div style={{ padding: '24px' }}>
+                <h3 className="text-xl font-bold text-white mb-5 text-center">
+                  🎰 {t('lobby.create_new_table')}
+                </h3>
 
-        {/* Create Form */}
-        {showCreateForm && (
-          <div className="bg-slate-800 rounded-lg p-4 mb-6 border border-slate-700">
-            <h3 className="text-lg font-bold text-white mb-4">Create New Table</h3>
-            <div className="grid sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm text-slate-400 mb-1">Small Blind</label>
-                <input
-                  type="number"
-                  value={smallBlind}
-                  onChange={(e) => setSmallBlind(e.target.value)}
-                  disabled={isCreating}
-                  className="w-full bg-slate-900 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-blue-500 focus:outline-none"
-                  placeholder="10"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-slate-400 mb-1">Big Blind</label>
-                <input
-                  type="number"
-                  value={bigBlind}
-                  onChange={(e) => setBigBlind(e.target.value)}
-                  disabled={isCreating}
-                  className="w-full bg-slate-900 text-white rounded-lg px-3 py-2 border border-slate-600 focus:border-blue-500 focus:outline-none"
-                  placeholder="20"
-                />
-              </div>
-              <div className="flex items-end">
-                <button
-                  onClick={handleCreateTable}
-                  disabled={isCreating}
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
-                >
-                  {isCreating ? 'Creating...' : 'Create'}
-                </button>
+                <div className="mb-4" style={{ boxSizing: 'border-box' }}>
+                  <label className="block text-sm font-semibold text-emerald-200 mb-2">
+                    💵 {t('lobby.small_blind')}
+                  </label>
+                  <input
+                    type="number"
+                    value={smallBlind}
+                    onChange={(e) => setSmallBlind(e.target.value)}
+                    disabled={state.isLoading}
+                    style={{
+                      boxSizing: 'border-box',
+                      width: '100%',
+                      backgroundColor: '#064e3b',
+                      color: 'white'
+                    }}
+                    className="border-2 border-emerald-600 focus:border-emerald-400 focus:outline-none rounded-lg px-3 py-2 text-base font-semibold disabled:opacity-50"
+                    placeholder="10"
+                  />
+                </div>
+
+                <div className="mb-5" style={{ boxSizing: 'border-box' }}>
+                  <label className="block text-sm font-semibold text-emerald-200 mb-2">
+                    💰 {t('lobby.big_blind')}
+                  </label>
+                  <input
+                    type="number"
+                    value={bigBlind}
+                    onChange={(e) => setBigBlind(e.target.value)}
+                    disabled={state.isLoading}
+                    style={{
+                      boxSizing: 'border-box',
+                      width: '100%',
+                      backgroundColor: '#064e3b',
+                      color: 'white'
+                    }}
+                    className="border-2 border-emerald-600 focus:border-emerald-400 focus:outline-none rounded-lg px-3 py-2 text-base font-semibold disabled:opacity-50"
+                    placeholder="20"
+                  />
+                </div>
+
+                <div className="flex gap-3" style={{ boxSizing: 'border-box' }}>
+                  <button
+                    onClick={() => setShowCreateForm(false)}
+                    disabled={state.isLoading}
+                    className="flex-1 bg-emerald-700 hover:bg-emerald-600 text-white py-2.5 rounded-lg font-semibold disabled:opacity-50 transition-colors border border-emerald-600"
+                    style={{ boxSizing: 'border-box' }}
+                  >
+                    {t('common.cancel')}
+                  </button>
+                  <button
+                    onClick={handleCreateTable}
+                    disabled={state.isLoading}
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-lg font-semibold disabled:opacity-50 transition-colors shadow-lg"
+                    style={{ boxSizing: 'border-box' }}
+                  >
+                    {state.isLoading ? t('lobby.creating') : t('lobby.create')}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          </>,
+          document.body
         )}
 
-        {/* Wrong Network */}
+        {/* 网络错误提示 */}
         {fhevm.wrongNetwork && (
-          <div className="bg-red-900/50 border border-red-600 rounded-lg p-4 mb-6">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">⚠️</span>
-              <div className="flex-1">
-                <p className="text-red-400 font-medium">Wrong Network</p>
-                <p className="text-red-300 text-sm">Switch to Sepolia to play</p>
+          <div className="bg-yellow-900/30 border-2 border-yellow-600 rounded-lg p-5 mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-yellow-300 font-bold mb-2 text-lg">⚠️ {t('errors.wrong_network')}</p>
+                <p className="text-yellow-200 text-sm">
+                  {i18n.language === 'zh-CN'
+                    ? '当前网络不正确，本游戏需要连接到 Sepolia 测试网'
+                    : 'Wrong network detected. This game requires Sepolia testnet'}
+                </p>
               </div>
               <button
-                onClick={() => fhevm.switchToSepolia()}
-                className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg"
+                onClick={async () => {
+                  try {
+                    await fhevm.switchToSepolia();
+                  } catch (err) {
+                    console.error('切换网络失败:', err);
+                  }
+                }}
+                className="bg-yellow-600 hover:bg-yellow-500 text-white px-6 py-3 rounded-lg font-bold transition-colors whitespace-nowrap shadow-lg"
               >
-                Switch
+                🔄 {t('errors.switch_to_sepolia')}
               </button>
             </div>
           </div>
         )}
 
-        {/* Loading */}
-        {state.isLoading && tables.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-4xl mb-3">🎰</div>
-            <p className="text-slate-400">Loading tables...</p>
+        {/* FHEVM 错误提示 */}
+        {fhevm.error && !fhevm.wrongNetwork && (
+          <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-red-300 font-semibold mb-1">⚠️ {t('errors.fhevm_connection_error')}</p>
+                <p className="text-red-200 text-sm">{fhevm.error.message}</p>
+                {fhevm.error.message.includes('backend connection') && (
+                  <p className="text-yellow-300 text-sm mt-2">
+                    💡 {t('errors.relayer_unavailable')}
+                  </p>
+                )}
+                {fhevm.error.message.includes('could not decode') && (
+                  <div className="mt-2">
+                    <p className="text-yellow-300 text-sm font-semibold">
+                      💡 {t('errors.contract_not_deployed')}
+                    </p>
+                    <p className="text-yellow-200 text-xs mt-1">
+                      {t('errors.contract_error_hint')}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={fhevm.retryInitialization}
+                disabled={fhevm.isInitializing}
+                className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white px-4 py-2 rounded font-semibold transition-colors whitespace-nowrap"
+              >
+                {fhevm.isInitializing ? t('errors.fhevm_retrying') : `🔄 ${t('errors.fhevm_retry')}`}
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Empty */}
-        {!state.isLoading && tables.length === 0 && (
-          <div className="text-center py-12 bg-slate-800 rounded-lg border border-slate-700">
-            <div className="text-5xl mb-4">🎲</div>
-            <h3 className="text-xl font-bold text-white mb-2">No Tables</h3>
-            <p className="text-slate-400 mb-4">Create the first table!</p>
-            <button
-              onClick={() => setShowCreateForm(true)}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg"
-            >
-              + Create Table
-            </button>
+        {/* 错误提示 */}
+        {state.error && (
+          <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 mb-8">
+            <p className="text-red-300">{state.error}</p>
           </div>
         )}
 
-        {/* Tables Grid */}
-        {tables.length > 0 && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {tables.map((table) => (
+        {/* 游戏桌列表 - 响应式卡片网格 */}
+        <div
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+          style={{
+            gap: '24px',
+            display: 'grid',
+          }}
+        >
+          {tables.length > 0 ? (
+            tables.map((table) => (
               <TableCard
                 key={table.id}
                 tableId={table.id}
                 info={table.info}
                 onSelect={onSelectTable}
               />
-            ))}
-          </div>
-        )}
-      </main>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-16">
+              <div className="text-6xl mb-4">🎰</div>
+              <p className="text-emerald-400 text-xl font-semibold">{t('lobby.no_tables')}</p>
+              <p className="text-emerald-600 mt-2">{t('lobby.create_first_table')}</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -261,90 +321,108 @@ interface TableCardProps {
 }
 
 function TableCard({ tableId, info, onSelect }: TableCardProps) {
-  useTranslation();
+  const { t } = useTranslation();
   const { address } = useAccount();
-  const fhevm = useFHEVM();
   const [showJoinDialog, setShowJoinDialog] = useState(false);
   const [buyInAmount, setBuyInAmount] = useState('1000');
   const [isJoining, setIsJoining] = useState(false);
   const [playerTableId, setPlayerTableId] = useState<number | null>(null);
   const [checkingStatus, setCheckingStatus] = useState(true);
 
-  const gameState = Number(info[0]);
+  const state = Number(info[0]);
   const playerCount = Number(info[1]);
   const smallBlind = Number(info[8]);
   const bigBlind = Number(info[9]);
 
+  // 检查玩家是否已经在这个桌子中
   useEffect(() => {
     const checkPlayerStatus = async () => {
       if (!address) {
         setCheckingStatus(false);
         return;
       }
+
       try {
         const playerTableNum = await contractService.getPlayerTable(address);
         setPlayerTableId(Number(playerTableNum));
       } catch (err) {
-        console.warn('Cannot check player status:', err);
+        console.warn('⚠️ 无法检查玩家状态:', err);
       } finally {
         setCheckingStatus(false);
       }
     };
+
     checkPlayerStatus();
   }, [address, tableId]);
 
-  const getStateLabel = (state: number) => {
-    const labels: { [key: number]: string } = {
-      0: '⏳ Waiting',
-      1: '🃏 Pre-Flop',
-      2: '🎴 Flop',
-      3: '🎴 Turn',
-      4: '🎴 River',
-      5: '👀 Showdown',
-      6: '🏁 Ended',
+  const getStateName = (state: number): string => {
+    const stateKeys: { [key: number]: string } = {
+      0: 'game.states.waiting',
+      1: 'game.states.pre_flop',
+      2: 'game.states.flop',
+      3: 'game.states.turn',
+      4: 'game.states.river',
+      5: 'game.states.showdown',
+      6: 'game.states.ended',
     };
-    return labels[state] || '⏳ Waiting';
+    return t(stateKeys[state] || 'game.states.waiting');
   };
-
-  const isMyTable = playerTableId === tableId + 1;
-  const canJoin = gameState === 0 && playerCount < 6;
 
   const handleJoinClick = () => {
     if (!address) {
-      alert('Please connect wallet first');
+      alert(t('common.please_connect_wallet'));
       return;
     }
-    if (isMyTable) {
+
+    // 检查玩家是否已经在这个桌子中
+    const expectedTableId = tableId + 1;
+    if (playerTableId === expectedTableId) {
       onSelect(tableId);
       return;
     }
+
+    // 否则显示加入对话框
     setShowJoinDialog(true);
   };
 
   const handleConfirmJoin = async () => {
     if (!address) {
-      alert('Please connect wallet first');
+      alert(t('common.please_connect_wallet'));
       return;
     }
-    if (!fhevm.isInitialized) {
-      alert('FHE is loading... Please wait and try again.');
-      return;
-    }
+
     if (!buyInAmount || Number(buyInAmount) <= 0) {
-      alert('Please enter a valid buy-in amount');
+      alert(t('lobby.invalid_buy_in'));
       return;
     }
 
     try {
       setIsJoining(true);
-      const encrypted = await fhevm.encryptBuyIn(Number(buyInAmount));
+
+      // Initialize FHEVM and encrypt directly (bypass hook state check)
+      console.log('⏳ Initializing FHEVM and encrypting...');
+      const { initFHEVM, encryptUint64 } = await import('../lib/fhevm');
+      const { POKER_TABLE_ADDRESS } = await import('../lib/contract');
+
+      await initFHEVM();
+      console.log('✅ FHEVM ready');
+
+      // Encrypt buy-in amount
+      const encrypted = await encryptUint64(Number(buyInAmount), POKER_TABLE_ADDRESS, address);
+      console.log('✅ Buy-in encrypted');
+
+      // 调用合约加入游戏
       const { callJoinTable } = await import('../lib/ethers-contract');
       await callJoinTable(tableId, encrypted.encryptedAmount, encrypted.inputProof);
+
       setShowJoinDialog(false);
       setBuyInAmount('1000');
+
+      // 加入成功后，立即跳转到游戏页面
       onSelect(tableId);
     } catch (error) {
-      alert('Failed to join: ' + (error as Error).message);
+      console.error('❌ 加入失败:', error);
+      alert(t('lobby.join_failed', { error: (error as Error).message }));
     } finally {
       setIsJoining(false);
     }
@@ -352,104 +430,199 @@ function TableCard({ tableId, info, onSelect }: TableCardProps) {
 
   return (
     <>
-      <div className={`bg-slate-800 rounded-lg border p-4 ${
-        isMyTable ? 'border-green-500' : 'border-slate-700 hover:border-slate-500'
-      }`}>
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-lg font-bold text-white">Table #{tableId}</span>
-          <span className="text-sm text-slate-400">{getStateLabel(gameState)}</span>
-        </div>
-
-        {/* Info */}
-        <div className="space-y-2 mb-4 text-sm">
-          <div className="flex justify-between">
-            <span className="text-slate-400">Players</span>
-            <span className="text-white">{playerCount}/6</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-400">Blinds</span>
-            <span className="text-blue-400">{smallBlind}/{bigBlind}</span>
-          </div>
-        </div>
-
-        {/* Progress */}
-        <div className="mb-4">
-          <div className="h-1.5 bg-slate-700 rounded-full">
-            <div
-              className="h-full bg-blue-500 rounded-full"
-              style={{ width: `${(playerCount / 6) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Button */}
-        <button
-          onClick={handleJoinClick}
-          disabled={checkingStatus || (!canJoin && !isMyTable)}
-          className={`w-full py-2.5 rounded-lg font-medium ${
-            checkingStatus
-              ? 'bg-slate-700 text-slate-500'
-              : isMyTable
-              ? 'bg-green-600 hover:bg-green-500 text-white'
-              : canJoin
-              ? 'bg-blue-600 hover:bg-blue-500 text-white'
-              : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-          }`}
+      <div
+        className="overflow-hidden transition-all duration-300 hover:scale-105"
+        style={{
+          boxSizing: 'border-box',
+          background: 'linear-gradient(135deg, #065f46 0%, #064e3b 100%)',
+          borderRadius: '16px',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(16, 185, 129, 0.3)',
+          border: '1px solid rgba(16, 185, 129, 0.5)',
+        }}
+      >
+        {/* 卡片头部 - 带状态指示器 */}
+        <div
+          className="px-5 py-4"
+          style={{
+            backgroundColor: 'rgba(6, 78, 59, 0.6)',
+            borderBottom: '1px solid rgba(16, 185, 129, 0.3)',
+          }}
         >
-          {checkingStatus
-            ? '...'
-            : isMyTable
-            ? '🎮 Enter'
-            : canJoin
-            ? '🚪 Join'
-            : gameState === 6
-            ? 'Ended'
-            : 'In Progress'}
-        </button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div
+                className="rounded-full p-2"
+                style={{
+                  backgroundColor: 'rgba(16, 185, 129, 0.3)',
+                }}
+              >
+                <span style={{ fontSize: '24px' }}>🎮</span>
+              </div>
+              <div>
+                <div style={{ color: 'white', fontWeight: 'bold', fontSize: '20px' }}>{t('lobby.table_number', { number: tableId })}</div>
+                <div className="flex items-center gap-2 mt-1">
+                  <div
+                    className="rounded-full"
+                    style={{
+                      width: '8px',
+                      height: '8px',
+                      backgroundColor: state === 0 ? '#4ade80' : state === 6 ? '#6b7280' : '#60a5fa',
+                      animation: state !== 6 ? 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' : 'none',
+                    }}
+                  ></div>
+                  <span style={{ color: '#6ee7b7', fontSize: '14px', fontWeight: '500' }}>{getStateName(state)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 卡片内容 */}
+        <div style={{ padding: '20px' }}>
+          <div style={{ marginBottom: '20px' }}>
+            {/* 玩家数 */}
+            <div
+              className="flex items-center justify-between rounded-lg px-4 py-3"
+              style={{
+                backgroundColor: 'rgba(6, 78, 59, 0.4)',
+                marginBottom: '12px',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span style={{ fontSize: '18px' }}>👥</span>
+                <span style={{ color: '#6ee7b7', fontSize: '14px', fontWeight: '500' }}>{t('lobby.players')}</span>
+              </div>
+              <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>{playerCount} / 6</span>
+            </div>
+
+            {/* 盲注 */}
+            <div
+              className="flex items-center justify-between rounded-lg px-4 py-3"
+              style={{
+                backgroundColor: 'rgba(6, 78, 59, 0.4)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <span style={{ fontSize: '18px' }}>💰</span>
+                <span style={{ color: '#6ee7b7', fontSize: '14px', fontWeight: '500' }}>{t('lobby.blinds')}</span>
+              </div>
+              <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>{smallBlind} / {bigBlind}</span>
+            </div>
+          </div>
+
+          {/* 操作按钮 */}
+          <button
+            onClick={handleJoinClick}
+            disabled={checkingStatus || (state !== 0 && playerTableId !== tableId + 1)}
+            className={`w-full py-3 rounded-xl font-bold text-base transition-all duration-200 ${
+              checkingStatus
+                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                : playerTableId === tableId + 1
+                ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg hover:shadow-blue-500/50'
+                : state !== 0
+                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg hover:shadow-emerald-500/50'
+            }`}
+          >
+            {checkingStatus
+              ? `⏳ ${t('lobby.checking')}`
+              : playerTableId === tableId + 1
+              ? `🚀 ${t('lobby.enter_game')}`
+              : state !== 0
+              ? `🔒 ${t('lobby.game_in_progress')}`
+              : `✨ ${t('lobby.join')}`}
+          </button>
+        </div>
       </div>
 
-      {/* Join Modal */}
-      {showJoinDialog && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-lg p-5 w-full max-w-sm border border-slate-700">
-            <h3 className="text-lg font-bold text-white mb-1">Join Table #{tableId}</h3>
-            <p className="text-slate-400 text-sm mb-4">Blinds: {smallBlind}/{bigBlind}</p>
+      {/* 加入游戏对话框 - 带遮罩的小弹窗 */}
+      {showJoinDialog && createPortal(
+        <>
+          {/* 半透明遮罩层 */}
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+              backdropFilter: 'blur(2px)',
+              zIndex: 9998
+            }}
+            onClick={() => !isJoining && setShowJoinDialog(false)}
+          />
 
-            <div className="mb-4">
-              <label className="block text-sm text-slate-400 mb-1">Buy-in Amount</label>
-              <input
-                type="number"
-                value={buyInAmount}
-                onChange={(e) => setBuyInAmount(e.target.value)}
-                disabled={isJoining}
-                className="w-full bg-slate-900 text-white rounded-lg px-3 py-3 border border-slate-600 focus:border-blue-500 focus:outline-none text-center text-lg"
-                placeholder="1000"
-              />
-              <p className="text-xs text-slate-500 mt-1 text-center">
-                Min: {bigBlind * 10} chips
-              </p>
-            </div>
+          {/* 弹窗内容 */}
+          <div
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 9999,
+              maxWidth: '90vw',
+              width: '360px',
+              backgroundColor: '#047857',
+              boxSizing: 'border-box',
+              borderRadius: '20px',
+              overflow: 'hidden'
+            }}
+            className="shadow-2xl animate-scaleIn border-2 border-emerald-600"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ padding: '24px' }}>
+              <h3 className="text-xl font-bold text-white mb-5 text-center">
+                🎮 {t('lobby.join_table_title', { tableId })}
+              </h3>
 
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowJoinDialog(false)}
-                disabled={isJoining}
-                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2.5 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmJoin}
-                disabled={isJoining}
-                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-lg font-medium disabled:opacity-50"
-              >
-                {isJoining ? 'Joining...' : 'Join'}
-              </button>
+              <div className="mb-5" style={{ boxSizing: 'border-box' }}>
+                <label className="block text-sm font-semibold text-emerald-200 mb-2">
+                  💰 {t('lobby.buy_in_amount')}
+                </label>
+                <input
+                  type="number"
+                  value={buyInAmount}
+                  onChange={(e) => setBuyInAmount(e.target.value)}
+                  disabled={isJoining}
+                  style={{
+                    boxSizing: 'border-box',
+                    width: '100%',
+                    backgroundColor: '#064e3b',
+                    color: 'white'
+                  }}
+                  className="border-2 border-emerald-600 focus:border-emerald-400 focus:outline-none rounded-lg px-3 py-2 text-base font-semibold disabled:opacity-50"
+                  placeholder="1000"
+                />
+                <p className="text-xs text-emerald-300 mt-2">
+                  {t('lobby.min_buy_in', { amount: bigBlind * 10 })}
+                </p>
+              </div>
+
+              <div className="flex gap-3" style={{ boxSizing: 'border-box' }}>
+                <button
+                  onClick={() => setShowJoinDialog(false)}
+                  disabled={isJoining}
+                  className="flex-1 bg-emerald-700 hover:bg-emerald-600 text-white py-2.5 rounded-lg font-semibold disabled:opacity-50 transition-colors border border-emerald-600"
+                  style={{ boxSizing: 'border-box' }}
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  onClick={handleConfirmJoin}
+                  disabled={isJoining}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-lg font-semibold disabled:opacity-50 transition-colors shadow-lg"
+                  style={{ boxSizing: 'border-box' }}
+                >
+                  {isJoining ? t('lobby.joining') : t('common.confirm')}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </>,
+        document.body
       )}
     </>
   );
 }
+

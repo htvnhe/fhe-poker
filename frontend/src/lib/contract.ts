@@ -1,5 +1,5 @@
 // 合约地址和ABI配置
-export const POKER_TABLE_ADDRESS = '0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623'; // Sepolia - Deployed with fhevm/solidity 0.9.1 + ZamaEthereumConfig
+export const POKER_TABLE_ADDRESS = '0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623'; // Sepolia测试网
 
 // 完整的 JSON ABI - 包含所有错误定义
 export const POKER_TABLE_ABI = [

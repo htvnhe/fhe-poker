@@ -1,104 +1,99 @@
-type FhevmInstance = any;
+import { createInstance, SepoliaConfig, initSDK } from '@zama-fhe/relayer-sdk/web';
+import type { FhevmInstance } from '@zama-fhe/relayer-sdk/web';
 
-// 声明 window 类型
+// Declare window type
 declare global {
   interface Window {
     ethereum?: any;
-    relayerSDK?: any;  // UMD CDN 脚本暴露为 relayerSDK
   }
 }
 
 let fhevmInstance: FhevmInstance | null = null;
 
-// 等待 UMD SDK 加载完成
-async function waitForSDK(maxWaitTime: number = 30000): Promise<any> {
-  const startTime = Date.now();
-
-  while (!window.relayerSDK) {
-    const elapsed = Date.now() - startTime;
-
-    if (elapsed > maxWaitTime) {
-      throw new Error('Relayer SDK 加载超时（30秒）。请检查 CDN 脚本是否在 index.html 中正确加载');
-    }
-
-    await new Promise(resolve => setTimeout(resolve, 100));
-  }
-
-  return window.relayerSDK;
-}
-
 /**
- * 初始化FHEVM实例
- * @param chainId 链ID (11155111 for Sepolia, 31337 for localhost)
+ * Initialize FHEVM instance
  */
-export async function initFHEVM(_chainId: number = 11155111): Promise<FhevmInstance> {
-  // Skip cross-origin check - let it try anyway
+export async function initFHEVM(): Promise<FhevmInstance> {
+  console.log('🔍 Cross-Origin Isolated:', window.crossOriginIsolated);
+
   if (fhevmInstance) {
+    console.log('✅ FHEVM already initialized');
     return fhevmInstance;
   }
 
   try {
-    // 检查钱包
+    // Check wallet
     if (typeof window === 'undefined' || !window.ethereum) {
-      throw new Error('未检测到钱包，请安装并连接 MetaMask/OKX 钱包');
+      throw new Error('No wallet detected. Please install MetaMask');
     }
+    console.log('✅ Wallet detected');
 
-    // 等待 UMD SDK 加载完成
-    const sdk = await waitForSDK();
+    // Initialize WASM first
+    console.log('⏳ Initializing SDK (loading WASM)...');
+    await initSDK();
+    console.log('✅ SDK initialized');
 
-    try {
-      await sdk.initSDK(); // Load needed WASM
-    } catch (sdkError) {
-      console.error('❌ SDK 初始化失败:', sdkError);
-      // 不抛出错误，继续执行
-    }
+    // Create instance with FIXED relayer URL
+    console.log('⏳ Creating FHEVM instance...');
+    console.log('📋 Original relayerUrl:', SepoliaConfig.relayerUrl);
 
-    // 创建配置对象，添加 window.ethereum
+    // Use CORRECT contract addresses from Zama docs (SDK has outdated ones!)
     const config = {
-      ...sdk.SepoliaConfig,
+      // FHEVM Host chain contracts (Sepolia)
+      aclContractAddress: '0xf0Ffdc93b7E186bC2f8CB3dAA75D86d1930A433D',
+      kmsContractAddress: '0xbE0E383937d564D7FF0BC3b46c51f0bF8d5C311A',
+      inputVerifierContractAddress: '0xBBC1fFCdc7C316aAAd72E807D9b0272BE8F84DA0',
+      // Gateway chain contracts
+      verifyingContractAddressDecryption: SepoliaConfig.verifyingContractAddressDecryption,
+      verifyingContractAddressInputVerification: SepoliaConfig.verifyingContractAddressInputVerification,
+      chainId: 11155111, // Sepolia
+      gatewayChainId: SepoliaConfig.gatewayChainId,
       network: window.ethereum,
-      // 确保使用正确的 relayer URL
-      relayerUrl: 'https://relayer.testnet.zama.cloud',
+      // FIXED: Use correct relayer URL
+      relayerUrl: 'https://relayer.testnet.zama.org',
     };
+    console.log('📋 Using relayerUrl:', config.relayerUrl);
 
-    // 创建实例
-    const instance = await sdk.createInstance(config);
+    const instance = await createInstance(config);
+    console.log('✅ FHEVM instance created');
 
-    // 只有完全成功才赋值
     fhevmInstance = instance;
-
     return fhevmInstance;
   } catch (error) {
-    console.error('❌ FHEVM初始化失败:', error);
+    console.error('❌ FHEVM init failed:', error);
     throw error;
   }
 }
 
 /**
- * 加密uint64数值
+ * Encrypt uint64 value
  */
 export async function encryptUint64(
   value: number | bigint,
   contractAddress: string,
   userAddress: string
 ) {
+  console.log('🔐 encryptUint64 called with:', { value, contractAddress, userAddress });
+
   const instance = await initFHEVM();
+  console.log('✅ Got FHEVM instance');
 
-  // 导入 ethers 来处理地址格式
   const { getAddress } = await import('ethers');
-
-  // 使用校验和地址格式
   const checksumContractAddr = getAddress(contractAddress);
   const checksumUserAddr = getAddress(userAddress);
+  console.log('📋 Addresses:', { checksumContractAddr, checksumUserAddr });
 
+  console.log('⏳ Creating encrypted input...');
   const input = instance.createEncryptedInput(checksumContractAddr, checksumUserAddr);
+  console.log('⏳ Adding value:', BigInt(value).toString());
   input.add64(BigInt(value));
+  console.log('⏳ Encrypting (calling relayer)...');
   const encryptedInput = await input.encrypt();
+  console.log('✅ Encryption complete');
 
   const dataToUse = encryptedInput.handles?.[0];
   const proofToUse = encryptedInput.inputProof;
 
-  // 验证数据有效性
   if (!dataToUse || !(dataToUse instanceof Uint8Array)) {
     throw new Error('Invalid encrypted data: encryptedAmount must be Uint8Array');
   }
@@ -114,7 +109,7 @@ export async function encryptUint64(
 }
 
 /**
- * 加密uint8数值
+ * Encrypt uint8 value
  */
 export async function encryptUint8(
   value: number | bigint,
@@ -123,10 +118,7 @@ export async function encryptUint8(
 ) {
   const instance = await initFHEVM();
 
-  // 导入 ethers 来处理地址格式
   const { getAddress } = await import('ethers');
-
-  // 使用校验和地址格式
   const checksumContractAddr = getAddress(contractAddress);
   const checksumUserAddr = getAddress(userAddress);
 
@@ -137,7 +129,6 @@ export async function encryptUint8(
   const dataToUse = encryptedInput.handles?.[0];
   const proofToUse = encryptedInput.inputProof;
 
-  // 验证数据有效性
   if (!dataToUse || !(dataToUse instanceof Uint8Array)) {
     throw new Error('Invalid encrypted data: encryptedAmount must be Uint8Array');
   }
@@ -153,26 +144,21 @@ export async function encryptUint8(
 }
 
 /**
- * 获取FHEVM实例 (如果需要直接访问)
+ * Get FHEVM instance
  */
 export function getFHEVMInstance(): FhevmInstance | null {
   return fhevmInstance;
 }
 
 /**
- * 重置FHEVM实例
+ * Reset FHEVM instance
  */
 export function resetFHEVM() {
   fhevmInstance = null;
 }
 
 /**
- * 解密 euint8 值(用于手牌)
- * @param handle 加密值的 handle (bytes32)
- * @param contractAddress 合约地址
- * @param userAddress 用户地址
- * @param signer ethers Signer 对象
- * @returns 解密后的数值
+ * Decrypt euint8 value (for cards)
  */
 export async function decryptUint8(
   handle: string,
@@ -182,10 +168,8 @@ export async function decryptUint8(
 ): Promise<number> {
   const instance = await initFHEVM();
 
-  // 生成临时密钥对
   const keypair = instance.generateKeypair();
 
-  // 准备解密请求
   const handleContractPairs = [
     {
       handle: handle,
@@ -194,10 +178,9 @@ export async function decryptUint8(
   ];
 
   const startTimeStamp = Math.floor(Date.now() / 1000).toString();
-  const durationDays = '10'; // 10天有效期
+  const durationDays = '10';
   const contractAddresses = [contractAddress];
 
-  // 创建 EIP-712 签名数据
   const eip712 = instance.createEIP712(
     keypair.publicKey,
     contractAddresses,
@@ -205,7 +188,6 @@ export async function decryptUint8(
     durationDays,
   );
 
-  // 用户签名授权解密
   const signature = await signer.signTypedData(
     eip712.domain,
     {
@@ -214,7 +196,6 @@ export async function decryptUint8(
     eip712.message,
   );
 
-  // 调用 Relayer 进行解密
   const result = await instance.userDecrypt(
     handleContractPairs,
     keypair.privateKey,
@@ -226,19 +207,12 @@ export async function decryptUint8(
     durationDays,
   );
 
-  // 返回解密后的值
-  const decryptedValue = result[handle];
-
+  const decryptedValue = (result as any)[handle];
   return Number(decryptedValue);
 }
 
 /**
- * 批量解密多个 euint8 值 (只需签名一次)
- * @param handles 要解密的 handle 数组
- * @param contractAddress 合约地址
- * @param userAddress 用户地址
- * @param signer ethers Signer 对象
- * @returns 解密后的数值数组
+ * Batch decrypt euint8 values
  */
 export async function decryptUint8Batch(
   handles: string[],
@@ -248,20 +222,17 @@ export async function decryptUint8Batch(
 ): Promise<number[]> {
   const instance = await initFHEVM();
 
-  // 生成临时密钥对
   const keypair = instance.generateKeypair();
 
-  // 准备解密请求 - 批量处理
   const handleContractPairs = handles.map(handle => ({
     handle: handle,
     contractAddress: contractAddress,
   }));
 
   const startTimeStamp = Math.floor(Date.now() / 1000).toString();
-  const durationDays = '10'; // 10天有效期
+  const durationDays = '10';
   const contractAddresses = [contractAddress];
 
-  // 创建 EIP-712 签名数据
   const eip712 = instance.createEIP712(
     keypair.publicKey,
     contractAddresses,
@@ -269,7 +240,6 @@ export async function decryptUint8Batch(
     durationDays,
   );
 
-  // 用户签名授权解密 (只签名一次!)
   const signature = await signer.signTypedData(
     eip712.domain,
     {
@@ -278,7 +248,6 @@ export async function decryptUint8Batch(
     eip712.message,
   );
 
-  // 调用 Relayer 进行批量解密
   const result = await instance.userDecrypt(
     handleContractPairs,
     keypair.privateKey,
@@ -290,9 +259,8 @@ export async function decryptUint8Batch(
     durationDays,
   );
 
-  // 返回解密后的值数组
   const decryptedValues = handles.map(handle => {
-    const value = result[handle];
+    const value = (result as any)[handle];
     return Number(value);
   });
 
