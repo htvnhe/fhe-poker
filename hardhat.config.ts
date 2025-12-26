@@ -37,9 +37,10 @@ const config: HardhatUserConfig = {
     deployer: 0,
   },
   etherscan: {
-    apiKey: {
-      sepolia: vars.get("ETHERSCAN_API_KEY", ""),
-    },
+    apiKey: "VITE2Z9NK3NVINNPTWEXMZ2Q6XQM41AUKT",
+  },
+  sourcify: {
+    enabled: true,
   },
   gasReporter: {
     currency: "USD",
@@ -71,7 +72,7 @@ const config: HardhatUserConfig = {
             count: 10,
           },
       chainId: 11155111,
-      url: "https://1rpc.io/sepolia",
+      url: "https://ethereum-sepolia-rpc.publicnode.com",
     },
   },
   paths: {
