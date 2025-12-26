@@ -240,7 +240,7 @@ interface TableCardProps {
 }
 
 function TableCard({ tableId, info, onSelect }: TableCardProps) {
-  const { t } = useTranslation();
+  useTranslation(); // i18n initialized
   const { address } = useAccount();
   const fhevm = useFHEVM();
   const [showJoinDialog, setShowJoinDialog] = useState(false);

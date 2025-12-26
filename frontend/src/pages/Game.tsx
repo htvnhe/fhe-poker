@@ -47,7 +47,7 @@ function PokerCard({ card, isHidden = false, size = 'md' }: { card?: number | nu
 }
 
 export function Game({ tableId, onBack }: GameProps) {
-  const { t } = useTranslation();
+  useTranslation(); // i18n initialized
   const { address } = useAccount();
   const fhevm = useFHEVM();
   const { state, setTableInfo, setPlayerCards, setCommunityCards, setLoading, setError } = useGameStore();
