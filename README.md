@@ -10,7 +10,7 @@
 
 **A fully on-chain Texas Hold'em poker game powered by FHEVM (Fully Homomorphic Encryption Virtual Machine), ensuring complete privacy and provable fairness.**
 
-[🎮 Live Demo](https://frontend-orpin-seven-10.vercel.app) | [🎬 Video Demo](https://youtu.be/YOUR_VIDEO_ID) | [📖 Documentation](./docs/DESIGN.md) | [🐛 Report Bug](../../issues)
+[🎮 Live Demo](https://stealth-holdem.vercel.app) | [🎬 Video Demo](https://youtu.be/YOUR_VIDEO_ID) | [📖 Documentation](./docs/DESIGN.md) | [🐛 Report Bug](../../issues)
 
 </div>
 
@@ -76,7 +76,7 @@
 
 ### 🎮 Play Now
 
-1. **Visit the Live Demo**: [https://frontend-orpin-seven-10.vercel.app](https://frontend-orpin-seven-10.vercel.app)
+1. **Visit the Live Demo**: [https://stealth-holdem.vercel.app](https://stealth-holdem.vercel.app)
 2. **Connect Wallet**: Click "Connect Wallet" and approve MetaMask
 3. **Switch to Sepolia**: Make sure you're on Sepolia testnet
 4. **Join or Create Table**: Choose a table or create your own
