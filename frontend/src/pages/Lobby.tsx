@@ -132,6 +132,20 @@ export function Lobby({ onSelectTable, onBack }: LobbyProps) {
           >
             🔄 Refresh
           </button>
+
+          {/* FHEVM Status */}
+          <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm ${
+            fhevm.isInitialized
+              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+              : fhevm.isInitializing
+                ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                : 'bg-red-500/20 text-red-400 border border-red-500/30'
+          }`}>
+            <div className={`w-2 h-2 rounded-full ${
+              fhevm.isInitialized ? 'bg-emerald-400' : fhevm.isInitializing ? 'bg-yellow-400 animate-pulse' : 'bg-red-400'
+            }`}></div>
+            {fhevm.isInitialized ? '🔐 FHE Ready' : fhevm.isInitializing ? '⏳ FHE Loading...' : '❌ FHE Error'}
+          </div>
         </div>
 
         {/* Create Table Form */}
@@ -303,7 +317,14 @@ function TableCard({ tableId, info, onSelect }: TableCardProps) {
   };
 
   const handleConfirmJoin = async () => {
-    if (!address || !fhevm.isInitialized) return;
+    if (!address) {
+      alert('Please connect wallet first');
+      return;
+    }
+    if (!fhevm.isInitialized) {
+      alert('FHEVM is initializing... Please wait a moment and try again.');
+      return;
+    }
     if (!buyInAmount || Number(buyInAmount) <= 0) {
       alert('Please enter a valid buy-in amount');
       return;
