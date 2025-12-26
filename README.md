@@ -20,7 +20,7 @@
 
 | Network | Contract | Address | Status |
 |---------|----------|---------|--------|
-| Sepolia | CipherTable | [`0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623`](https://sepolia.etherscan.io/address/0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623) | ✅ Verified |
+| Sepolia | PokerTable | [`0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623`](https://sepolia.etherscan.io/address/0xB670D1b2a80b5B0f3b393F9Ce79bAe974e79a623) | ✅ Verified |
 
 ---
 

@@ -5,11 +5,11 @@ import { FHE, euint8, euint64, ebool, externalEuint64 } from "@fhevm/solidity/li
 import { ZamaEthereumConfig } from "@fhevm/solidity/config/ZamaConfig.sol";
 
 /**
- * @title CipherTable
+ * @title PokerTable
  * @notice 基于FHEVM的隐私德州扑克游戏合约
  * @dev 使用全同态加密保护玩家手牌隐私
  */
-contract CipherTable is ZamaEthereumConfig {
+contract PokerTable is ZamaEthereumConfig {
     
     // ============ 常量定义 ============
     
