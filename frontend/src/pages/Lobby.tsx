@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { useTranslation } from 'react-i18next';
 import { contractService } from '../services/ContractService';
+import { callCreateTable } from '../lib/ethers-contract';
 import { useFHEVM } from '../hooks/useFHEVM';
 import { useGameStore } from '../store/gameStore.tsx';
 import { LanguageSwitcher } from '../components/layout/LanguageSwitcher';
@@ -64,7 +65,7 @@ export function Lobby({ onSelectTable, onBack }: LobbyProps) {
 
     try {
       setIsCreating(true);
-      await contractService.createTable(Number(smallBlind), Number(bigBlind));
+      await callCreateTable(Number(smallBlind), Number(bigBlind));
       await loadTables(false);
       setShowCreateForm(false);
       setSmallBlind('10');
