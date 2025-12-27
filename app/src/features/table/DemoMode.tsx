@@ -26,33 +26,138 @@ interface Player {
   color: string;
 }
 
-// Poker Card Component
-function PokerCard({ card, isHidden = false, unknown = false }: { card?: number; isHidden?: boolean; unknown?: boolean }) {
+// Beautiful Poker Card Component
+function PokerCard({ card, isHidden = false, unknown = false, size = 'normal' }: {
+  card?: number;
+  isHidden?: boolean;
+  unknown?: boolean;
+  size?: 'small' | 'normal' | 'large';
+}) {
+  // Size configurations
+  const sizeConfig = {
+    small: { w: 'w-12', h: 'h-[72px]', corner: 'text-[10px]', suit: 'text-xs', center: 'text-2xl', pip: 'text-[8px]' },
+    normal: { w: 'w-16', h: 'h-24', corner: 'text-xs', suit: 'text-sm', center: 'text-4xl', pip: 'text-[10px]' },
+    large: { w: 'w-20', h: 'h-[120px]', corner: 'text-sm', suit: 'text-base', center: 'text-5xl', pip: 'text-xs' },
+  };
+  const s = sizeConfig[size];
+
+  // Unknown card (community cards not revealed)
   if (unknown) {
     return (
-      <div className="w-16 h-24 bg-white rounded-lg shadow-lg flex items-center justify-center opacity-30 border border-gray-300">
-        <span className="text-black font-bold text-2xl">?</span>
+      <div className={`${s.w} ${s.h} relative rounded-xl overflow-hidden opacity-40`}
+        style={{
+          background: 'linear-gradient(145deg, #f5f5f5, #e0e0e0)',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+        }}>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-gray-400 font-bold text-3xl">?</span>
+        </div>
       </div>
     );
   }
 
+  // Card back (hidden cards)
   if (isHidden || card === undefined) {
     return (
-      <div className="w-16 h-24 bg-gradient-to-br from-blue-800 to-blue-900 rounded-lg shadow-lg flex items-center justify-center border-2 border-blue-600">
-        <span className="text-4xl opacity-50">🂠</span>
+      <div className={`${s.w} ${s.h} relative rounded-xl overflow-hidden transform hover:scale-105 transition-transform cursor-pointer`}
+        style={{
+          background: 'linear-gradient(135deg, #1e3a5f 0%, #0d1b2a 50%, #1e3a5f 100%)',
+          boxShadow: '0 8px 25px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+          border: '3px solid #2d4a6f',
+        }}>
+        {/* Diamond pattern */}
+        <div className="absolute inset-2 rounded-lg overflow-hidden"
+          style={{
+            background: `
+              repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 8px,
+                rgba(255,215,0,0.1) 8px,
+                rgba(255,215,0,0.1) 9px
+              ),
+              repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 8px,
+                rgba(255,215,0,0.1) 8px,
+                rgba(255,215,0,0.1) 9px
+              )
+            `,
+          }}>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(135deg, #ffd700, #b8860b)',
+                boxShadow: '0 2px 10px rgba(255,215,0,0.5)',
+              }}>
+              <span className="text-xl">♠</span>
+            </div>
+          </div>
+        </div>
+        {/* Shine effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent pointer-events-none" />
       </div>
     );
   }
 
+  // Revealed card
   const cardIndex = card - 1;
-  const suit = SUITS[Math.floor(cardIndex / 13)];
+  const suitIndex = Math.floor(cardIndex / 13);
+  const suit = SUITS[suitIndex];
   const rank = RANKS[cardIndex % 13];
   const isRed = suit === '♥' || suit === '♦';
+  const color = isRed ? '#dc2626' : '#1f2937';
+
+  // Get suit symbol for display
+  const getSuitSymbol = (s: string) => {
+    switch(s) {
+      case '♠': return { symbol: '♠', name: 'spade' };
+      case '♥': return { symbol: '♥', name: 'heart' };
+      case '♦': return { symbol: '♦', name: 'diamond' };
+      case '♣': return { symbol: '♣', name: 'club' };
+      default: return { symbol: s, name: 'unknown' };
+    }
+  };
+  const suitInfo = getSuitSymbol(suit);
 
   return (
-    <div className="w-16 h-24 bg-white rounded-lg shadow-lg flex flex-col items-center justify-center border border-gray-200">
-      <span className={`text-lg font-bold ${isRed ? 'text-red-600' : 'text-gray-800'}`}>{rank}</span>
-      <span className={`text-2xl ${isRed ? 'text-red-600' : 'text-gray-800'}`}>{suit}</span>
+    <div className={`${s.w} ${s.h} relative rounded-xl overflow-hidden transform hover:scale-105 hover:-translate-y-1 transition-all cursor-pointer`}
+      style={{
+        background: 'linear-gradient(145deg, #ffffff 0%, #f8f8f8 50%, #f0f0f0 100%)',
+        boxShadow: '0 8px 25px rgba(0,0,0,0.3), 0 3px 10px rgba(0,0,0,0.2)',
+        border: '1px solid rgba(0,0,0,0.1)',
+      }}>
+
+      {/* Inner border */}
+      <div className="absolute inset-1 rounded-lg border border-gray-200 pointer-events-none" />
+
+      {/* Top-left corner */}
+      <div className="absolute top-1.5 left-1.5 flex flex-col items-center leading-none">
+        <span className={`${s.corner} font-bold`} style={{ color }}>{rank}</span>
+        <span className={`${s.pip}`} style={{ color }}>{suit}</span>
+      </div>
+
+      {/* Bottom-right corner (rotated) */}
+      <div className="absolute bottom-1.5 right-1.5 flex flex-col items-center leading-none rotate-180">
+        <span className={`${s.corner} font-bold`} style={{ color }}>{rank}</span>
+        <span className={`${s.pip}`} style={{ color }}>{suit}</span>
+      </div>
+
+      {/* Center suit - large */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className={`${s.center} drop-shadow-sm`} style={{ color }}>{suitInfo.symbol}</span>
+      </div>
+
+      {/* Subtle texture overlay */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Ccircle cx='1' cy='1' r='1'/%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+
+      {/* Shine effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-transparent pointer-events-none"
+        style={{ clipPath: 'polygon(0 0, 100% 0, 0 50%)' }} />
     </div>
   );
 }
@@ -494,19 +599,19 @@ export function DemoMode({ onBack }: DemoModeProps) {
                       <span className="text-red-300 text-xs mt-1">FOLDED</span>
                     )}
 
-                    {/* Cards - Only show player's cards */}
+                    {/* Cards - Only show player's cards (large size) */}
                     {idx === 0 && player.cards.length > 0 && (
-                      <div className="flex gap-1 mt-2">
-                        <PokerCard card={player.cards[0]} />
-                        <PokerCard card={player.cards[1]} />
+                      <div className="flex gap-2 mt-3 -mb-2">
+                        <PokerCard card={player.cards[0]} size="large" />
+                        <PokerCard card={player.cards[1]} size="large" />
                       </div>
                     )}
 
-                    {/* Bot cards - hidden */}
+                    {/* Bot cards - hidden (small size) */}
                     {idx !== 0 && player.cards.length > 0 && !player.folded && (
                       <div className="flex gap-1 mt-2">
-                        <PokerCard isHidden />
-                        <PokerCard isHidden />
+                        <PokerCard isHidden size="small" />
+                        <PokerCard isHidden size="small" />
                       </div>
                     )}
                   </div>
