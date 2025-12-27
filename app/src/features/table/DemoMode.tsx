@@ -270,15 +270,13 @@ export function DemoMode({ onBack }: { onBack: () => void }) {
         <div className="flex justify-between items-center mb-4 px-2">
           {/* Left: Balance */}
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{
-              background: 'linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.4))',
-              border: '1px solid rgba(234,179,8,0.3)',
+            <div className="flex items-center gap-2 px-5 py-3 rounded-xl" style={{
+              background: 'linear-gradient(180deg, #1a1a1a, #000)',
+              border: '2px solid #fbbf24',
+              boxShadow: '0 0 15px rgba(251,191,36,0.3)',
             }}>
-              <span className="text-2xl">💰</span>
-              <div>
-                <p className="text-xs text-white/60">Your Balance</p>
-                <p className="text-xl font-bold text-yellow-400">{players[0].chips}</p>
-              </div>
+              <span className="text-3xl">💰</span>
+              <p className="text-2xl font-bold text-yellow-400">{players[0].chips}</p>
             </div>
             {isMyTurn && (
               <div className="px-4 py-2 rounded-full bg-green-500/20 border border-green-500/50 animate-pulse">
