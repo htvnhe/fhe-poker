@@ -564,7 +564,7 @@ export function DemoMode({ onBack }: DemoModeProps) {
         </div>
 
         {/* Main Game Area */}
-        <div className="relative" style={{ height: '600px' }}>
+        <div className="relative" style={{ height: '650px' }}>
           {/* Poker Table */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                style={{ width: '800px', height: '400px' }}>
@@ -635,20 +635,20 @@ export function DemoMode({ onBack }: DemoModeProps) {
 
           {/* Players around the table */}
           {players.map((player, idx) => {
-            // Position players around the oval table
+            // Position players around the oval table - adjusted for card visibility
             const positions: React.CSSProperties[] = [
-              { bottom: '10px', left: '50%', transform: 'translateX(-50%)' }, // You - bottom center
-              { bottom: '120px', left: '80px' }, // Left bottom
-              { top: '120px', left: '80px' }, // Left top
-              { top: '10px', left: '50%', transform: 'translateX(-50%)' }, // Top center
+              { bottom: '0px', left: '50%', transform: 'translateX(-50%)' }, // You - bottom center
+              { bottom: '150px', left: '60px' }, // Left bottom
+              { top: '100px', left: '60px' }, // Left top
+              { top: '0px', left: '50%', transform: 'translateX(-50%)' }, // Top center
             ];
 
             // Bet chip positions (closer to table center)
             const betPositions: React.CSSProperties[] = [
-              { bottom: '200px', left: '50%', transform: 'translateX(-50%)' },
-              { bottom: '220px', left: '220px' },
-              { top: '220px', left: '220px' },
-              { top: '200px', left: '50%', transform: 'translateX(-50%)' },
+              { bottom: '220px', left: '50%', transform: 'translateX(-50%)' },
+              { bottom: '250px', left: '200px' },
+              { top: '200px', left: '200px' },
+              { top: '180px', left: '50%', transform: 'translateX(-50%)' },
             ];
 
             const isActive = currentPlayerIndex === idx && phase !== 'waiting' && phase !== 'finished';
@@ -678,7 +678,7 @@ export function DemoMode({ onBack }: DemoModeProps) {
                       boxShadow: isActive
                         ? '0 0 30px rgba(34,197,94,0.5), 0 10px 30px rgba(0,0,0,0.5)'
                         : '0 10px 30px rgba(0,0,0,0.5)',
-                      minWidth: idx === 0 ? '200px' : '140px',
+                      minWidth: idx === 0 ? '220px' : '140px',
                     }}>
                       {/* Dealer button */}
                       {player.isDealer && (
@@ -725,12 +725,12 @@ export function DemoMode({ onBack }: DemoModeProps) {
                       {/* Player's hole cards */}
                       {player.cards.length > 0 && !player.folded && (
                         <div className="px-3 pb-3">
-                          <div className={`flex justify-center ${idx === 0 ? 'gap-2' : 'gap-1'}`}>
+                          <div className={`flex justify-center ${idx === 0 ? 'gap-3' : 'gap-1'}`}>
                             {idx === 0 ? (
-                              // Show player's cards
+                              // Show player's cards - LARGE size
                               <>
-                                <PokerCard card={player.cards[0]} size="normal" />
-                                <PokerCard card={player.cards[1]} size="normal" />
+                                <PokerCard card={player.cards[0]} size="large" />
+                                <PokerCard card={player.cards[1]} size="large" />
                               </>
                             ) : (
                               // Hide bot cards
