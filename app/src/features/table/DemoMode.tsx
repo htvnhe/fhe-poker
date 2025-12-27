@@ -20,11 +20,12 @@ interface Player {
 }
 
 // Premium Card Component
-function Card({ value, hidden = false, size = 'normal' }: { value?: number; hidden?: boolean; size?: 'small' | 'normal' | 'large' }) {
+function Card({ value, hidden = false, size = 'normal' }: { value?: number; hidden?: boolean; size?: 'small' | 'normal' | 'large' | 'xlarge' }) {
   const sizes = {
-    small: { w: 'w-12', h: 'h-16', rank: 'text-sm', suit: 'text-lg' },
-    normal: { w: 'w-16', h: 'h-24', rank: 'text-xl', suit: 'text-3xl' },
-    large: { w: 'w-20', h: 'h-28', rank: 'text-2xl', suit: 'text-4xl' },
+    small: { w: 'w-14', h: 'h-20', rank: 'text-base', suit: 'text-xl', corner: 'text-xs' },
+    normal: { w: 'w-24', h: 'h-36', rank: 'text-3xl', suit: 'text-5xl', corner: 'text-sm' },
+    large: { w: 'w-32', h: 'h-48', rank: 'text-5xl', suit: 'text-7xl', corner: 'text-lg' },
+    xlarge: { w: 'w-40', h: 'h-56', rank: 'text-6xl', suit: 'text-8xl', corner: 'text-xl' },
   };
   const s = sizes[size];
 
@@ -58,9 +59,9 @@ function Card({ value, hidden = false, size = 'normal' }: { value?: number; hidd
         border: '1px solid #ddd',
       }}>
       {/* Corner pip */}
-      <div className="absolute top-1 left-1.5 flex flex-col items-center leading-tight">
-        <span className={`text-xs font-bold ${isRed ? 'text-red-500' : 'text-gray-800'}`}>{rank}</span>
-        <span className={`text-xs ${isRed ? 'text-red-500' : 'text-gray-800'}`}>{suit}</span>
+      <div className="absolute top-2 left-2 flex flex-col items-center leading-tight">
+        <span className={`${s.corner} font-bold ${isRed ? 'text-red-500' : 'text-gray-800'}`}>{rank}</span>
+        <span className={`${s.corner} ${isRed ? 'text-red-500' : 'text-gray-800'}`}>{suit}</span>
       </div>
       {/* Center */}
       <span className={`${s.rank} font-bold ${isRed ? 'text-red-500' : 'text-gray-800'}`}>{rank}</span>
@@ -263,16 +264,38 @@ export function DemoMode({ onBack }: { onBack: () => void }) {
     <div className="min-h-screen p-4" style={{
       background: 'radial-gradient(ellipse at top, #1a3a2a 0%, #0d1f17 50%, #050a08 100%)',
     }}>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
 
-        {/* Header */}
+        {/* Header with Balance on left */}
         <div className="flex justify-between items-center mb-4 px-2">
+          {/* Left: Balance */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{
+              background: 'linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.4))',
+              border: '1px solid rgba(234,179,8,0.3)',
+            }}>
+              <span className="text-2xl">💰</span>
+              <div>
+                <p className="text-xs text-white/60">Your Balance</p>
+                <p className="text-xl font-bold text-yellow-400">{players[0].chips}</p>
+              </div>
+            </div>
+            {isMyTurn && (
+              <div className="px-4 py-2 rounded-full bg-green-500/20 border border-green-500/50 animate-pulse">
+                <span className="text-green-400 font-bold">YOUR TURN</span>
+              </div>
+            )}
+          </div>
+
+          {/* Center: Logo */}
           <div className="flex items-center gap-3">
             <span className="text-2xl">🎰</span>
             <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200">
               STEALTH POKER
             </span>
           </div>
+
+          {/* Right: Exit */}
           <button onClick={onBack} className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
             ✕ Exit
           </button>
@@ -356,7 +379,7 @@ export function DemoMode({ onBack }: { onBack: () => void }) {
                 {community[i] ? (
                   <Card value={community[i]} size="normal" />
                 ) : (
-                  <div className="w-16 h-24 rounded-xl flex items-center justify-center"
+                  <div className="w-24 h-36 rounded-xl flex items-center justify-center"
                     style={{
                       background: 'rgba(0,0,0,0.3)',
                       border: '2px dashed rgba(255,255,255,0.2)',
@@ -389,31 +412,28 @@ export function DemoMode({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        {/* YOUR CARDS */}
-        <div className="rounded-2xl p-5 mb-4" style={{
+        {/* YOUR CARDS - Bigger */}
+        <div className="rounded-2xl p-6 mb-4" style={{
           background: 'linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.4))',
           border: '1px solid rgba(255,255,255,0.1)',
         }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center text-2xl"
+              <div className="w-14 h-14 rounded-full flex items-center justify-center text-3xl"
                 style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }}>
                 😎
               </div>
               <div>
-                <p className="text-white font-bold text-lg">You</p>
-                <p className="text-yellow-400">💰 {players[0].chips}</p>
+                <p className="text-white font-bold text-xl">Your Hand</p>
+                {players[0].bet > 0 && (
+                  <p className="text-yellow-400 text-sm">Bet: {players[0].bet}</p>
+                )}
               </div>
             </div>
             {players[0].bet > 0 && <ChipStack amount={players[0].bet} />}
-            {isMyTurn && (
-              <div className="px-3 py-1 rounded-full bg-green-500/20 border border-green-500/50">
-                <span className="text-green-400 text-sm font-bold animate-pulse">YOUR TURN</span>
-              </div>
-            )}
           </div>
 
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-6">
             {players[0].cards.length > 0 ? (
               <>
                 <Card value={players[0].cards[0]} size="large" />
