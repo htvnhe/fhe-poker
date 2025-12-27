@@ -564,7 +564,7 @@ export function DemoMode({ onBack }: DemoModeProps) {
         </div>
 
         {/* Main Game Area */}
-        <div className="relative" style={{ height: '650px' }}>
+        <div className="relative overflow-visible" style={{ height: '700px', marginBottom: '20px' }}>
           {/* Poker Table */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                style={{ width: '800px', height: '400px' }}>
@@ -637,18 +637,18 @@ export function DemoMode({ onBack }: DemoModeProps) {
           {players.map((player, idx) => {
             // Position players around the oval table - adjusted for card visibility
             const positions: React.CSSProperties[] = [
-              { bottom: '0px', left: '50%', transform: 'translateX(-50%)' }, // You - bottom center
-              { bottom: '150px', left: '60px' }, // Left bottom
-              { top: '100px', left: '60px' }, // Left top
-              { top: '0px', left: '50%', transform: 'translateX(-50%)' }, // Top center
+              { bottom: '180px', left: '50%', transform: 'translateX(-50%)' }, // You - above card display
+              { bottom: '200px', left: '30px' }, // Left bottom
+              { top: '150px', left: '30px' }, // Left top
+              { top: '30px', left: '50%', transform: 'translateX(-50%)' }, // Top center
             ];
 
             // Bet chip positions (closer to table center)
             const betPositions: React.CSSProperties[] = [
-              { bottom: '220px', left: '50%', transform: 'translateX(-50%)' },
-              { bottom: '250px', left: '200px' },
-              { top: '200px', left: '200px' },
-              { top: '180px', left: '50%', transform: 'translateX(-50%)' },
+              { bottom: '280px', left: '50%', transform: 'translateX(-50%)' },
+              { bottom: '280px', left: '180px' },
+              { top: '230px', left: '180px' },
+              { top: '150px', left: '50%', transform: 'translateX(-50%)' },
             ];
 
             const isActive = currentPlayerIndex === idx && phase !== 'waiting' && phase !== 'finished';
@@ -722,23 +722,12 @@ export function DemoMode({ onBack }: DemoModeProps) {
                         )}
                       </div>
 
-                      {/* Player's hole cards */}
-                      {player.cards.length > 0 && !player.folded && (
+                      {/* Bot's hole cards - only show for bots, player cards shown separately */}
+                      {idx !== 0 && player.cards.length > 0 && !player.folded && (
                         <div className="px-3 pb-3">
-                          <div className={`flex justify-center ${idx === 0 ? 'gap-3' : 'gap-1'}`}>
-                            {idx === 0 ? (
-                              // Show player's cards - LARGE size
-                              <>
-                                <PokerCard card={player.cards[0]} size="large" />
-                                <PokerCard card={player.cards[1]} size="large" />
-                              </>
-                            ) : (
-                              // Hide bot cards
-                              <>
-                                <PokerCard isHidden size="small" />
-                                <PokerCard isHidden size="small" />
-                              </>
-                            )}
+                          <div className="flex justify-center gap-1">
+                            <PokerCard isHidden size="small" />
+                            <PokerCard isHidden size="small" />
                           </div>
                         </div>
                       )}
@@ -748,6 +737,23 @@ export function DemoMode({ onBack }: DemoModeProps) {
               </div>
             );
           })}
+
+          {/* YOUR CARDS - Always visible at bottom */}
+          {players[0].cards.length > 0 && !players[0].folded && phase !== 'waiting' && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50">
+              <div className="flex flex-col items-center">
+                <span className="text-yellow-400 text-sm font-bold mb-2 drop-shadow-lg">YOUR CARDS</span>
+                <div className="flex gap-4 p-4 rounded-2xl" style={{
+                  background: 'rgba(0,0,0,0.8)',
+                  boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                  border: '2px solid rgba(255,215,0,0.3)',
+                }}>
+                  <PokerCard card={players[0].cards[0]} size="large" />
+                  <PokerCard card={players[0].cards[1]} size="large" />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Phase indicator */}
           <div className="absolute top-4 left-1/2 -translate-x-1/2">
