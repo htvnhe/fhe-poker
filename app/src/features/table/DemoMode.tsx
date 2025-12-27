@@ -500,221 +500,425 @@ export function DemoMode({ onBack }: DemoModeProps) {
 
   const isMyTurn = currentPlayerIndex === 0 && phase !== 'waiting' && phase !== 'showdown' && phase !== 'finished';
 
+  // Chip stack component
+  const ChipStack = ({ amount, color = 'gold' }: { amount: number; color?: string }) => {
+    if (amount <= 0) return null;
+    const chipColors: Record<string, string> = {
+      gold: 'from-yellow-400 to-yellow-600',
+      red: 'from-red-400 to-red-600',
+      blue: 'from-blue-400 to-blue-600',
+      green: 'from-green-400 to-green-600',
+    };
+    return (
+      <div className="flex flex-col items-center">
+        <div className="relative">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className={`w-8 h-2 rounded-full bg-gradient-to-b ${chipColors[color]} border border-white/30`}
+              style={{
+                marginTop: i === 0 ? 0 : '-4px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              }}
+            />
+          ))}
+        </div>
+        <span className="text-yellow-300 text-xs font-bold mt-1">{amount}</span>
+      </div>
+    );
+  };
+
   return (
-    <div className="min-h-screen p-4" style={{ background: 'linear-gradient(135deg, #0d2818 0%, #1a472a 50%, #0a5f38 100%)' }}>
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-xl shadow-2xl p-4 mb-4 border border-slate-600">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <span className="text-xl font-bold text-yellow-400">🎮 Demo Mode</span>
-              <span className="text-sm text-gray-400">Single Player Practice</span>
+    <div className="min-h-screen" style={{
+      background: 'radial-gradient(ellipse at center, #1a1a2e 0%, #0f0f1a 50%, #0a0a12 100%)',
+    }}>
+      {/* Casino ambient lighting */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-yellow-500/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-green-500/5 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto p-4">
+        {/* Header - Casino style */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className="px-4 py-2 rounded-lg" style={{
+              background: 'linear-gradient(135deg, #b8860b, #daa520)',
+              boxShadow: '0 4px 15px rgba(218,165,32,0.3)',
+            }}>
+              <span className="text-black font-bold text-lg">♠ STEALTH HOLD'EM ♠</span>
             </div>
-            <div className="flex items-center gap-4">
-              <LocaleSwitch />
-              <button
-                onClick={onBack}
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg shadow-lg transition-all"
-              >
-                🚪 Exit Demo
-              </button>
+            <div className="px-3 py-1 bg-green-600/80 rounded-full">
+              <span className="text-white text-sm">Demo Table</span>
             </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <LocaleSwitch />
+            <button
+              onClick={onBack}
+              className="px-4 py-2 bg-red-600/80 hover:bg-red-600 text-white font-semibold rounded-lg transition-all"
+            >
+              Exit
+            </button>
           </div>
         </div>
 
-        {/* Game Table */}
-        <div className="relative h-[500px] overflow-hidden">
-          {/* Table */}
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-               style={{ width: '700px', height: '350px' }}>
-            <div style={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-              borderRadius: '50%',
-              border: '8px solid #000',
-              background: '#0d6832',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.5), inset 0 0 60px rgba(0,0,0,0.3)'
-            }}></div>
+        {/* Main Game Area */}
+        <div className="relative" style={{ height: '600px' }}>
+          {/* Poker Table */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+               style={{ width: '800px', height: '400px' }}>
+            {/* Wood rim */}
+            <div className="absolute inset-0 rounded-[200px]" style={{
+              background: 'linear-gradient(145deg, #8B4513, #5D3A1A, #8B4513)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.1)',
+              padding: '12px',
+            }}>
+              {/* Felt surface */}
+              <div className="w-full h-full rounded-[190px] relative overflow-hidden" style={{
+                background: 'radial-gradient(ellipse at center, #1a5f3c 0%, #0d4528 60%, #0a3a20 100%)',
+                boxShadow: 'inset 0 0 100px rgba(0,0,0,0.5)',
+              }}>
+                {/* Felt texture */}
+                <div className="absolute inset-0 opacity-30" style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+                }} />
 
-            {/* Center - Pot and Community Cards */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-10">
-              {/* Pot */}
-              <div className="bg-black/40 backdrop-blur-sm px-6 py-2 rounded-full mb-4 border border-yellow-500/50">
-                <span className="text-yellow-400 font-bold text-xl">Pot: {pot}</span>
-              </div>
+                {/* Table border line */}
+                <div className="absolute inset-8 rounded-[150px] border-2 border-yellow-600/30" />
 
-              {/* Community Cards */}
-              <div className="flex gap-2 p-3 bg-black/30 rounded-full">
-                {[0, 1, 2, 3, 4].map((idx) => {
-                  const card = communityCards[idx];
-                  return card ? (
-                    <PokerCard key={idx} card={card} />
-                  ) : (
-                    <PokerCard key={idx} unknown />
-                  );
-                })}
+                {/* Center area - Pot & Community Cards */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                  {/* Pot display */}
+                  <div className="mb-6 flex items-center gap-3 px-6 py-3 rounded-full" style={{
+                    background: 'linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%)',
+                    border: '2px solid rgba(218,165,32,0.5)',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                  }}>
+                    <div className="flex -space-x-1">
+                      {[...Array(Math.min(5, Math.ceil(pot / 50)))].map((_, i) => (
+                        <div key={i} className="w-6 h-6 rounded-full bg-gradient-to-b from-yellow-400 to-yellow-600 border-2 border-yellow-300" style={{
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                        }} />
+                      ))}
+                    </div>
+                    <span className="text-yellow-400 font-bold text-2xl drop-shadow-lg">{pot}</span>
+                  </div>
+
+                  {/* Community Cards */}
+                  <div className="flex gap-3 p-4 rounded-2xl" style={{
+                    background: 'rgba(0,0,0,0.3)',
+                    boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.3)',
+                  }}>
+                    {[0, 1, 2, 3, 4].map((idx) => {
+                      const card = communityCards[idx];
+                      const isFlop = idx < 3 && phase !== 'waiting' && phase !== 'preflop';
+                      const isTurn = idx === 3 && (phase === 'turn' || phase === 'river' || phase === 'showdown' || phase === 'finished');
+                      const isRiver = idx === 4 && (phase === 'river' || phase === 'showdown' || phase === 'finished');
+                      const shouldShow = isFlop || isTurn || isRiver;
+
+                      return (
+                        <div key={idx} className="transform hover:scale-105 transition-transform">
+                          {shouldShow && card ? (
+                            <PokerCard card={card} />
+                          ) : (
+                            <PokerCard unknown />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Players */}
+          {/* Players around the table */}
           {players.map((player, idx) => {
-            const positions = [
-              { bottom: '20px', left: '50%', transform: 'translateX(-50%)' },
-              { top: '50%', left: '50px', transform: 'translateY(-50%)' },
-              { top: '20px', left: '50%', transform: 'translateX(-50%)' },
-              { top: '50%', right: '50px', transform: 'translateY(-50%)' },
+            // Position players around the oval table
+            const positions: React.CSSProperties[] = [
+              { bottom: '10px', left: '50%', transform: 'translateX(-50%)' }, // You - bottom center
+              { bottom: '120px', left: '80px' }, // Left bottom
+              { top: '120px', left: '80px' }, // Left top
+              { top: '10px', left: '50%', transform: 'translateX(-50%)' }, // Top center
             ];
 
+            // Bet chip positions (closer to table center)
+            const betPositions: React.CSSProperties[] = [
+              { bottom: '200px', left: '50%', transform: 'translateX(-50%)' },
+              { bottom: '220px', left: '220px' },
+              { top: '220px', left: '220px' },
+              { top: '200px', left: '50%', transform: 'translateX(-50%)' },
+            ];
+
+            const isActive = currentPlayerIndex === idx && phase !== 'waiting' && phase !== 'finished';
+
             return (
-              <div key={player.id} className="absolute" style={positions[idx]}>
-                <div
-                  className={`p-3 rounded-2xl min-w-[140px] ${
-                    currentPlayerIndex === idx && phase !== 'waiting' && phase !== 'finished'
-                      ? 'ring-4 ring-yellow-400 shadow-[0_0_20px_rgba(212,175,55,0.6)]'
-                      : ''
-                  } ${player.folded ? 'opacity-50' : ''}`}
-                  style={{ backgroundColor: player.color }}
-                >
-                  <div className="flex flex-col items-center">
-                    {/* Avatar */}
-                    <div className="text-3xl mb-1">{player.avatar}</div>
+              <div key={player.id}>
+                {/* Bet chips on table */}
+                {player.bet > 0 && (
+                  <div className="absolute z-20" style={betPositions[idx]}>
+                    <ChipStack amount={player.bet} color={idx === 0 ? 'gold' : 'red'} />
+                  </div>
+                )}
 
-                    {/* Name */}
-                    <p className="text-white font-bold text-sm">{player.name}</p>
+                {/* Player seat */}
+                <div className="absolute z-10" style={positions[idx]}>
+                  <div className={`relative ${player.folded ? 'opacity-40' : ''}`}>
+                    {/* Active player glow */}
+                    {isActive && (
+                      <div className="absolute -inset-2 rounded-2xl animate-pulse" style={{
+                        background: 'radial-gradient(ellipse, rgba(34,197,94,0.4) 0%, transparent 70%)',
+                      }} />
+                    )}
 
-                    {/* Chips */}
-                    <p className="text-yellow-300 text-xs">{player.chips} chips</p>
+                    {/* Player card */}
+                    <div className={`relative rounded-xl overflow-hidden ${isActive ? 'ring-2 ring-green-400' : ''}`} style={{
+                      background: 'linear-gradient(180deg, #2a2a3e 0%, #1a1a2e 100%)',
+                      boxShadow: isActive
+                        ? '0 0 30px rgba(34,197,94,0.5), 0 10px 30px rgba(0,0,0,0.5)'
+                        : '0 10px 30px rgba(0,0,0,0.5)',
+                      minWidth: idx === 0 ? '200px' : '140px',
+                    }}>
+                      {/* Dealer button */}
+                      {player.isDealer && (
+                        <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold z-10" style={{
+                          background: 'linear-gradient(135deg, #fff, #ddd)',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                          border: '2px solid #333',
+                        }}>
+                          D
+                        </div>
+                      )}
 
-                    {/* Bet */}
-                    {player.bet > 0 && (
-                      <div className="mt-1 bg-black/50 px-2 py-0.5 rounded-full">
-                        <span className="text-yellow-400 text-xs font-bold">Bet: {player.bet}</span>
+                      {/* Player info */}
+                      <div className="p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl" style={{
+                            background: player.color,
+                            boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.2)',
+                          }}>
+                            {idx === 0 ? '😎' : '🤖'}
+                          </div>
+                          <div>
+                            <p className="text-white font-bold text-sm">{player.name}</p>
+                            <div className="flex items-center gap-1">
+                              <span className="text-yellow-400 text-xs">💰</span>
+                              <span className="text-yellow-400 text-xs font-mono">{player.chips}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Status badge */}
+                        {player.folded && (
+                          <div className="text-center py-1 bg-red-600/30 rounded text-red-400 text-xs font-bold">
+                            FOLDED
+                          </div>
+                        )}
+                        {isActive && !player.folded && (
+                          <div className="text-center py-1 bg-green-600/30 rounded text-green-400 text-xs font-bold animate-pulse">
+                            THINKING...
+                          </div>
+                        )}
                       </div>
-                    )}
 
-                    {/* Status */}
-                    {player.folded && (
-                      <span className="text-red-300 text-xs mt-1">FOLDED</span>
-                    )}
-
-                    {/* Cards - Only show player's cards (large size) */}
-                    {idx === 0 && player.cards.length > 0 && (
-                      <div className="flex gap-2 mt-3 -mb-2">
-                        <PokerCard card={player.cards[0]} size="large" />
-                        <PokerCard card={player.cards[1]} size="large" />
-                      </div>
-                    )}
-
-                    {/* Bot cards - hidden (small size) */}
-                    {idx !== 0 && player.cards.length > 0 && !player.folded && (
-                      <div className="flex gap-1 mt-2">
-                        <PokerCard isHidden size="small" />
-                        <PokerCard isHidden size="small" />
-                      </div>
-                    )}
+                      {/* Player's hole cards */}
+                      {player.cards.length > 0 && !player.folded && (
+                        <div className="px-3 pb-3">
+                          <div className={`flex justify-center ${idx === 0 ? 'gap-2' : 'gap-1'}`}>
+                            {idx === 0 ? (
+                              // Show player's cards
+                              <>
+                                <PokerCard card={player.cards[0]} size="normal" />
+                                <PokerCard card={player.cards[1]} size="normal" />
+                              </>
+                            ) : (
+                              // Hide bot cards
+                              <>
+                                <PokerCard isHidden size="small" />
+                                <PokerCard isHidden size="small" />
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             );
           })}
+
+          {/* Phase indicator */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full" style={{
+              background: 'rgba(0,0,0,0.7)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}>
+              {['preflop', 'flop', 'turn', 'river'].map((p, i) => (
+                <div key={p} className="flex items-center">
+                  <div className={`w-2 h-2 rounded-full ${
+                    phase === p ? 'bg-green-400' :
+                    ['preflop', 'flop', 'turn', 'river'].indexOf(phase) > i ? 'bg-green-600' : 'bg-gray-600'
+                  }`} />
+                  {i < 3 && <div className="w-4 h-0.5 bg-gray-600 mx-1" />}
+                </div>
+              ))}
+              <span className="ml-2 text-white text-sm font-medium uppercase">{phase}</span>
+            </div>
+          </div>
         </div>
 
-        {/* Message */}
-        <div className="bg-slate-800 rounded-xl p-4 mb-4 text-center">
-          <p className="text-white text-lg">{message}</p>
-          <p className="text-gray-400 text-sm mt-1">
-            Phase: {phase.toUpperCase()} | Current Bet: {currentBet}
-          </p>
+        {/* Message Bar */}
+        <div className="text-center py-3 px-6 rounded-xl mb-4" style={{
+          background: 'linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%)',
+          border: '1px solid rgba(255,255,255,0.1)',
+        }}>
+          <p className="text-white text-lg font-medium">{message}</p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl shadow-2xl p-6 border-2 border-slate-700">
+        {/* Action Panel - Casino Style */}
+        <div className="rounded-2xl p-6" style={{
+          background: 'linear-gradient(180deg, #1f1f2e 0%, #15151f 100%)',
+          boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
+          border: '1px solid rgba(255,255,255,0.05)',
+        }}>
           {phase === 'waiting' && (
             <button
               onClick={startGame}
-              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-8 rounded-xl text-xl shadow-lg transform hover:scale-105 transition-all"
+              className="w-full py-5 rounded-xl text-xl font-bold transition-all transform hover:scale-[1.02]"
+              style={{
+                background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                boxShadow: '0 4px 20px rgba(34,197,94,0.4)',
+              }}
             >
-              🎮 Start Game
+              <span className="text-white drop-shadow-lg">🎮 START GAME</span>
             </button>
           )}
 
           {phase === 'finished' && (
             <div className="text-center">
               {winner && (
-                <div className="mb-4 p-6 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl">
-                  <span className="text-6xl">🏆</span>
-                  <p className="text-2xl font-bold text-white mt-2">{winner.name} Wins!</p>
-                  <p className="text-yellow-100">Won {pot} chips</p>
+                <div className="mb-6 py-8 rounded-2xl relative overflow-hidden" style={{
+                  background: 'linear-gradient(135deg, #fbbf24, #d97706)',
+                }}>
+                  <div className="absolute inset-0 opacity-20" style={{
+                    backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px)',
+                  }} />
+                  <div className="relative">
+                    <span className="text-7xl block mb-2">🏆</span>
+                    <p className="text-3xl font-black text-white drop-shadow-lg">{winner.name} WINS!</p>
+                    <p className="text-xl text-yellow-100 mt-2">+{pot} chips</p>
+                  </div>
                 </div>
               )}
               <button
                 onClick={startGame}
-                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl text-xl shadow-lg transform hover:scale-105 transition-all"
+                className="px-12 py-4 rounded-xl text-lg font-bold transition-all transform hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+                  boxShadow: '0 4px 20px rgba(139,92,246,0.4)',
+                }}
               >
-                🔄 Play Again
+                <span className="text-white">🔄 PLAY AGAIN</span>
               </button>
             </div>
           )}
 
           {phase !== 'waiting' && phase !== 'finished' && phase !== 'showdown' && (
-            <div className="flex justify-center gap-4">
+            <div className="flex justify-center gap-3">
+              {/* Fold Button */}
               <button
                 onClick={() => handleAction('fold')}
                 disabled={!isMyTurn}
-                className={`px-8 py-4 rounded-xl font-bold text-lg transition-all ${
-                  isMyTurn
-                    ? 'bg-red-600 hover:bg-red-700 text-white'
-                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                }`}
+                className="group relative px-6 py-4 rounded-xl font-bold text-lg transition-all"
+                style={{
+                  background: isMyTurn
+                    ? 'linear-gradient(180deg, #dc2626, #b91c1c)'
+                    : 'linear-gradient(180deg, #4b5563, #374151)',
+                  boxShadow: isMyTurn ? '0 4px 15px rgba(220,38,38,0.3)' : 'none',
+                  opacity: isMyTurn ? 1 : 0.5,
+                  cursor: isMyTurn ? 'pointer' : 'not-allowed',
+                }}
               >
-                Fold
+                <span className="text-white">FOLD</span>
               </button>
+
+              {/* Check Button */}
               <button
                 onClick={() => handleAction('check')}
                 disabled={!isMyTurn || currentBet > players[0].bet}
-                className={`px-8 py-4 rounded-xl font-bold text-lg transition-all ${
-                  isMyTurn && currentBet <= players[0].bet
-                    ? 'bg-slate-600 hover:bg-slate-700 text-white'
-                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                }`}
+                className="px-6 py-4 rounded-xl font-bold text-lg transition-all"
+                style={{
+                  background: isMyTurn && currentBet <= players[0].bet
+                    ? 'linear-gradient(180deg, #4b5563, #374151)'
+                    : 'linear-gradient(180deg, #374151, #1f2937)',
+                  boxShadow: isMyTurn && currentBet <= players[0].bet ? '0 4px 15px rgba(75,85,99,0.3)' : 'none',
+                  opacity: isMyTurn && currentBet <= players[0].bet ? 1 : 0.5,
+                  cursor: isMyTurn && currentBet <= players[0].bet ? 'pointer' : 'not-allowed',
+                }}
               >
-                Check
+                <span className="text-white">CHECK</span>
               </button>
+
+              {/* Call Button - Primary action */}
               <button
                 onClick={() => handleAction('call')}
                 disabled={!isMyTurn}
-                className={`px-8 py-4 rounded-xl font-bold text-lg transition-all ${
-                  isMyTurn
-                    ? 'bg-green-600 hover:bg-green-700 text-white animate-pulse'
-                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                }`}
+                className="px-8 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105"
+                style={{
+                  background: isMyTurn
+                    ? 'linear-gradient(180deg, #22c55e, #16a34a)'
+                    : 'linear-gradient(180deg, #374151, #1f2937)',
+                  boxShadow: isMyTurn ? '0 4px 20px rgba(34,197,94,0.4), 0 0 30px rgba(34,197,94,0.2)' : 'none',
+                  opacity: isMyTurn ? 1 : 0.5,
+                  cursor: isMyTurn ? 'pointer' : 'not-allowed',
+                }}
               >
-                Call {currentBet - players[0].bet > 0 ? currentBet - players[0].bet : ''}
+                <span className="text-white">
+                  CALL {currentBet - players[0].bet > 0 && <span className="ml-1 text-yellow-300">{currentBet - players[0].bet}</span>}
+                </span>
               </button>
+
+              {/* Raise Button */}
               <button
                 onClick={() => handleAction('raise')}
                 disabled={!isMyTurn || players[0].chips < currentBet + bigBlind * 2}
-                className={`px-8 py-4 rounded-xl font-bold text-lg transition-all ${
-                  isMyTurn && players[0].chips >= currentBet + bigBlind * 2
-                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black'
-                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                }`}
+                className="px-6 py-4 rounded-xl font-bold text-lg transition-all"
+                style={{
+                  background: isMyTurn && players[0].chips >= currentBet + bigBlind * 2
+                    ? 'linear-gradient(180deg, #fbbf24, #d97706)'
+                    : 'linear-gradient(180deg, #374151, #1f2937)',
+                  boxShadow: isMyTurn && players[0].chips >= currentBet + bigBlind * 2 ? '0 4px 15px rgba(251,191,36,0.3)' : 'none',
+                  opacity: isMyTurn && players[0].chips >= currentBet + bigBlind * 2 ? 1 : 0.5,
+                  cursor: isMyTurn && players[0].chips >= currentBet + bigBlind * 2 ? 'pointer' : 'not-allowed',
+                }}
               >
-                Raise +{bigBlind * 2}
+                <span className={isMyTurn && players[0].chips >= currentBet + bigBlind * 2 ? 'text-black' : 'text-white'}>
+                  RAISE <span className="font-mono">+{bigBlind * 2}</span>
+                </span>
               </button>
             </div>
           )}
 
           {phase === 'showdown' && (
-            <div className="text-center">
-              <p className="text-white text-xl mb-4">Showdown! Revealing cards...</p>
+            <div className="text-center py-4">
+              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full" style={{
+                background: 'rgba(139,92,246,0.2)',
+                border: '1px solid rgba(139,92,246,0.3)',
+              }}>
+                <div className="w-3 h-3 bg-purple-400 rounded-full animate-pulse" />
+                <span className="text-purple-300 text-lg font-medium">Revealing cards...</span>
+              </div>
             </div>
           )}
 
           {!isMyTurn && phase !== 'waiting' && phase !== 'finished' && phase !== 'showdown' && (
-            <p className="text-center text-gray-400 mt-4">Waiting for {players[currentPlayerIndex]?.name}...</p>
+            <div className="text-center mt-4">
+              <span className="text-gray-400">
+                Waiting for <span className="text-white font-medium">{players[currentPlayerIndex]?.name}</span>...
+              </span>
+            </div>
           )}
         </div>
       </div>
