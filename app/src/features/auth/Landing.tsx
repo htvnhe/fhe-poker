@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableBrowser } from '../browse/TableBrowser';
 import { TableView } from '../table/TableView';
+import { DemoMode } from '../table/DemoMode';
 import { SessionProvider } from '../../providers/SessionStore';
 import { LocaleSwitch } from '../../shared/ui/LocaleSwitch';
 
@@ -17,6 +18,7 @@ export function Landing() {
   const { switchChain } = useSwitchChain();
   const [showBrowser, setShowBrowser] = useState(false);
   const [activeTableId, setActiveTableId] = useState<number | null>(null);
+  const [showDemoMode, setShowDemoMode] = useState(false);
   const [wrongNetwork, setWrongNetwork] = useState(false);
   const [switchingNetwork, setSwitchingNetwork] = useState(false);
 
@@ -27,6 +29,11 @@ export function Landing() {
       setWrongNetwork(false);
     }
   }, [isConnected, chainId]);
+
+  // Demo Mode - can be accessed without wallet
+  if (showDemoMode) {
+    return <DemoMode onBack={() => setShowDemoMode(false)} />;
+  }
 
   const handleSwitchNetwork = async () => {
     if (!window.ethereum) {
@@ -148,6 +155,18 @@ export function Landing() {
                   </span>
                 </button>
               ))}
+
+              {/* Demo Mode - No wallet required */}
+              <button
+                onClick={() => setShowDemoMode(true)}
+                className="w-full group relative overflow-hidden bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl hover:scale-105 transform"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                <span className="relative flex items-center justify-center gap-3">
+                  <span className="text-2xl">🎯</span>
+                  <span>Try Demo (No Wallet)</span>
+                </span>
+              </button>
             </div>
 
             <div className="mt-6 text-center">
@@ -255,6 +274,18 @@ export function Landing() {
               <span className="relative flex items-center justify-center gap-3">
                 <span className="text-2xl">🎮</span>
                 <span>{t('lobby.enter')}</span>
+              </span>
+            </button>
+
+            {/* Demo Mode Button */}
+            <button
+              onClick={() => setShowDemoMode(true)}
+              className="w-full group relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl hover:scale-105"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+              <span className="relative flex items-center justify-center gap-3">
+                <span className="text-xl">🎯</span>
+                <span>Demo Mode (Practice)</span>
               </span>
             </button>
 
