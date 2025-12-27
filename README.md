@@ -10,7 +10,7 @@
 
 **A fully on-chain Texas Hold'em poker game powered by FHEVM (Fully Homomorphic Encryption Virtual Machine), ensuring complete privacy and provable fairness.**
 
-[🎮 Live Demo](https://stealth-holdem.vercel.app) | [🎬 Video Demo](https://youtu.be/YOUR_VIDEO_ID) | [📖 Documentation](./docs/DESIGN.md) | [🐛 Report Bug](../../issues)
+[🎮 Live Demo](https://stealth-holdem.vercel.app) | [🎬 Video Demo](https://youtu.be/kLrbn2HQd5w) | [📖 Documentation](./docs/DESIGN.md) | [🐛 Report Bug](../../issues)
 
 </div>
 
@@ -26,11 +26,11 @@
 
 ## 🎬 Video Demo
 
-[![FHE Poker Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg)](https://youtu.be/YOUR_VIDEO_ID)
+[![FHE Poker Demo](https://img.youtube.com/vi/kLrbn2HQd5w/maxresdefault.jpg)](https://youtu.be/kLrbn2HQd5w)
 
 > **Watch the 2-minute demo** showing gameplay with FHE encryption in action!
 >
-> *Click the image above or [watch on YouTube](https://youtu.be/YOUR_VIDEO_ID)*
+> *Click the image above or [watch on YouTube](https://youtu.be/kLrbn2HQd5w)*
 
 ---
 
